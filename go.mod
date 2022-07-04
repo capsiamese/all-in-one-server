@@ -3,6 +3,7 @@ module notification
 go 1.18
 
 require (
+	entgo.io/ent v0.10.1
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/davecgh/go-spew v1.1.1
@@ -16,7 +17,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/ilyakaznacheev/cleanenv v1.2.6
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/lib/pq v1.10.2
+	github.com/lib/pq v1.10.4
 	github.com/samber/lo v1.21.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sideshow/apns2 v0.23.0
