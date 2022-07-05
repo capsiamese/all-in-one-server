@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // ExtensionClientUpdate is the builder for updating ExtensionClient entities.
@@ -37,6 +39,12 @@ func (ecu *ExtensionClientUpdate) SetName(s string) *ExtensionClientUpdate {
 // SetExtensionID sets the "extension_id" field.
 func (ecu *ExtensionClientUpdate) SetExtensionID(s string) *ExtensionClientUpdate {
 	ecu.mutation.SetExtensionID(s)
+	return ecu
+}
+
+// SetClientUID sets the "client_uid" field.
+func (ecu *ExtensionClientUpdate) SetClientUID(u uuid.UUID) *ExtensionClientUpdate {
+	ecu.mutation.SetClientUID(u)
 	return ecu
 }
 
@@ -137,6 +145,13 @@ func (ecu *ExtensionClientUpdate) sqlSave(ctx context.Context) (n int, err error
 			Column: extensionclient.FieldExtensionID,
 		})
 	}
+	if value, ok := ecu.mutation.ClientUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: extensionclient.FieldClientUID,
+		})
+	}
 	if value, ok := ecu.mutation.LastAccessTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -172,6 +187,12 @@ func (ecuo *ExtensionClientUpdateOne) SetName(s string) *ExtensionClientUpdateOn
 // SetExtensionID sets the "extension_id" field.
 func (ecuo *ExtensionClientUpdateOne) SetExtensionID(s string) *ExtensionClientUpdateOne {
 	ecuo.mutation.SetExtensionID(s)
+	return ecuo
+}
+
+// SetClientUID sets the "client_uid" field.
+func (ecuo *ExtensionClientUpdateOne) SetClientUID(u uuid.UUID) *ExtensionClientUpdateOne {
+	ecuo.mutation.SetClientUID(u)
 	return ecuo
 }
 
@@ -294,6 +315,13 @@ func (ecuo *ExtensionClientUpdateOne) sqlSave(ctx context.Context) (_node *Exten
 			Type:   field.TypeString,
 			Value:  value,
 			Column: extensionclient.FieldExtensionID,
+		})
+	}
+	if value, ok := ecuo.mutation.ClientUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: extensionclient.FieldClientUID,
 		})
 	}
 	if value, ok := ecuo.mutation.LastAccessTime(); ok {

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -34,6 +35,7 @@ type ExtensionClientMutation struct {
 	id               *int
 	name             *string
 	extension_id     *string
+	client_uid       *uuid.UUID
 	last_access_time *time.Time
 	clearedFields    map[string]struct{}
 	done             bool
@@ -211,6 +213,42 @@ func (m *ExtensionClientMutation) ResetExtensionID() {
 	m.extension_id = nil
 }
 
+// SetClientUID sets the "client_uid" field.
+func (m *ExtensionClientMutation) SetClientUID(u uuid.UUID) {
+	m.client_uid = &u
+}
+
+// ClientUID returns the value of the "client_uid" field in the mutation.
+func (m *ExtensionClientMutation) ClientUID() (r uuid.UUID, exists bool) {
+	v := m.client_uid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClientUID returns the old "client_uid" field's value of the ExtensionClient entity.
+// If the ExtensionClient object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ExtensionClientMutation) OldClientUID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClientUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClientUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClientUID: %w", err)
+	}
+	return oldValue.ClientUID, nil
+}
+
+// ResetClientUID resets all changes to the "client_uid" field.
+func (m *ExtensionClientMutation) ResetClientUID() {
+	m.client_uid = nil
+}
+
 // SetLastAccessTime sets the "last_access_time" field.
 func (m *ExtensionClientMutation) SetLastAccessTime(t time.Time) {
 	m.last_access_time = &t
@@ -266,12 +304,15 @@ func (m *ExtensionClientMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ExtensionClientMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.name != nil {
 		fields = append(fields, extensionclient.FieldName)
 	}
 	if m.extension_id != nil {
 		fields = append(fields, extensionclient.FieldExtensionID)
+	}
+	if m.client_uid != nil {
+		fields = append(fields, extensionclient.FieldClientUID)
 	}
 	if m.last_access_time != nil {
 		fields = append(fields, extensionclient.FieldLastAccessTime)
@@ -288,6 +329,8 @@ func (m *ExtensionClientMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case extensionclient.FieldExtensionID:
 		return m.ExtensionID()
+	case extensionclient.FieldClientUID:
+		return m.ClientUID()
 	case extensionclient.FieldLastAccessTime:
 		return m.LastAccessTime()
 	}
@@ -303,6 +346,8 @@ func (m *ExtensionClientMutation) OldField(ctx context.Context, name string) (en
 		return m.OldName(ctx)
 	case extensionclient.FieldExtensionID:
 		return m.OldExtensionID(ctx)
+	case extensionclient.FieldClientUID:
+		return m.OldClientUID(ctx)
 	case extensionclient.FieldLastAccessTime:
 		return m.OldLastAccessTime(ctx)
 	}
@@ -327,6 +372,13 @@ func (m *ExtensionClientMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExtensionID(v)
+		return nil
+	case extensionclient.FieldClientUID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClientUID(v)
 		return nil
 	case extensionclient.FieldLastAccessTime:
 		v, ok := value.(time.Time)
@@ -389,6 +441,9 @@ func (m *ExtensionClientMutation) ResetField(name string) error {
 		return nil
 	case extensionclient.FieldExtensionID:
 		m.ResetExtensionID()
+		return nil
+	case extensionclient.FieldClientUID:
+		m.ResetClientUID()
 		return nil
 	case extensionclient.FieldLastAccessTime:
 		m.ResetLastAccessTime()

@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // ExtensionClient is the model entity for the ExtensionClient schema.
@@ -20,6 +22,8 @@ type ExtensionClient struct {
 	Name string `json:"name,omitempty"`
 	// ExtensionID holds the value of the "extension_id" field.
 	ExtensionID string `json:"extension_id,omitempty"`
+	// ClientUID holds the value of the "client_uid" field.
+	ClientUID uuid.UUID `json:"client_uid,omitempty"`
 	// LastAccessTime holds the value of the "last_access_time" field.
 	LastAccessTime time.Time `json:"last_access_time,omitempty"`
 }
@@ -35,6 +39,8 @@ func (*ExtensionClient) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case extensionclient.FieldLastAccessTime:
 			values[i] = new(sql.NullTime)
+		case extensionclient.FieldClientUID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type ExtensionClient", columns[i])
 		}
@@ -67,6 +73,12 @@ func (ec *ExtensionClient) assignValues(columns []string, values []interface{}) 
 				return fmt.Errorf("unexpected type %T for field extension_id", values[i])
 			} else if value.Valid {
 				ec.ExtensionID = value.String
+			}
+		case extensionclient.FieldClientUID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field client_uid", values[i])
+			} else if value != nil {
+				ec.ClientUID = *value
 			}
 		case extensionclient.FieldLastAccessTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -106,6 +118,8 @@ func (ec *ExtensionClient) String() string {
 	builder.WriteString(ec.Name)
 	builder.WriteString(", extension_id=")
 	builder.WriteString(ec.ExtensionID)
+	builder.WriteString(", client_uid=")
+	builder.WriteString(fmt.Sprintf("%v", ec.ClientUID))
 	builder.WriteString(", last_access_time=")
 	builder.WriteString(ec.LastAccessTime.Format(time.ANSIC))
 	builder.WriteByte(')')

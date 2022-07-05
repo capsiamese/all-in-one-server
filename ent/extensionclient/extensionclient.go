@@ -11,6 +11,8 @@ const (
 	FieldName = "name"
 	// FieldExtensionID holds the string denoting the extension_id field in the database.
 	FieldExtensionID = "extension_id"
+	// FieldClientUID holds the string denoting the client_uid field in the database.
+	FieldClientUID = "client_uid"
 	// FieldLastAccessTime holds the string denoting the last_access_time field in the database.
 	FieldLastAccessTime = "last_access_time"
 	// Table holds the table name of the extensionclient in the database.
@@ -22,6 +24,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldExtensionID,
+	FieldClientUID,
 	FieldLastAccessTime,
 }
 

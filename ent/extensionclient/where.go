@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	uuid "github.com/satori/go.uuid"
 )
 
 // ID filters vertices based on their ID field.
@@ -103,6 +104,13 @@ func Name(v string) predicate.ExtensionClient {
 func ExtensionID(v string) predicate.ExtensionClient {
 	return predicate.ExtensionClient(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldExtensionID), v))
+	})
+}
+
+// ClientUID applies equality check predicate on the "client_uid" field. It's identical to ClientUIDEQ.
+func ClientUID(v uuid.UUID) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldClientUID), v))
 	})
 }
 
@@ -332,6 +340,82 @@ func ExtensionIDEqualFold(v string) predicate.ExtensionClient {
 func ExtensionIDContainsFold(v string) predicate.ExtensionClient {
 	return predicate.ExtensionClient(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldExtensionID), v))
+	})
+}
+
+// ClientUIDEQ applies the EQ predicate on the "client_uid" field.
+func ClientUIDEQ(v uuid.UUID) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldClientUID), v))
+	})
+}
+
+// ClientUIDNEQ applies the NEQ predicate on the "client_uid" field.
+func ClientUIDNEQ(v uuid.UUID) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldClientUID), v))
+	})
+}
+
+// ClientUIDIn applies the In predicate on the "client_uid" field.
+func ClientUIDIn(vs ...uuid.UUID) predicate.ExtensionClient {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldClientUID), v...))
+	})
+}
+
+// ClientUIDNotIn applies the NotIn predicate on the "client_uid" field.
+func ClientUIDNotIn(vs ...uuid.UUID) predicate.ExtensionClient {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldClientUID), v...))
+	})
+}
+
+// ClientUIDGT applies the GT predicate on the "client_uid" field.
+func ClientUIDGT(v uuid.UUID) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldClientUID), v))
+	})
+}
+
+// ClientUIDGTE applies the GTE predicate on the "client_uid" field.
+func ClientUIDGTE(v uuid.UUID) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldClientUID), v))
+	})
+}
+
+// ClientUIDLT applies the LT predicate on the "client_uid" field.
+func ClientUIDLT(v uuid.UUID) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldClientUID), v))
+	})
+}
+
+// ClientUIDLTE applies the LTE predicate on the "client_uid" field.
+func ClientUIDLTE(v uuid.UUID) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldClientUID), v))
 	})
 }
 

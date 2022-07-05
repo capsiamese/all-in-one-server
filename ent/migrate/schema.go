@@ -12,7 +12,8 @@ var (
 	ExtensionClientsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "extension_id", Type: field.TypeString, Unique: true},
+		{Name: "extension_id", Type: field.TypeString},
+		{Name: "client_uid", Type: field.TypeUUID, Unique: true},
 		{Name: "last_access_time", Type: field.TypeTime},
 	}
 	// ExtensionClientsTable holds the schema information for the "extension_clients" table.

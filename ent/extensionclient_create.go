@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	uuid "github.com/satori/go.uuid"
 )
 
 // ExtensionClientCreate is the builder for creating a ExtensionClient entity.
@@ -29,6 +30,12 @@ func (ecc *ExtensionClientCreate) SetName(s string) *ExtensionClientCreate {
 // SetExtensionID sets the "extension_id" field.
 func (ecc *ExtensionClientCreate) SetExtensionID(s string) *ExtensionClientCreate {
 	ecc.mutation.SetExtensionID(s)
+	return ecc
+}
+
+// SetClientUID sets the "client_uid" field.
+func (ecc *ExtensionClientCreate) SetClientUID(u uuid.UUID) *ExtensionClientCreate {
+	ecc.mutation.SetClientUID(u)
 	return ecc
 }
 
@@ -114,6 +121,9 @@ func (ecc *ExtensionClientCreate) check() error {
 	if _, ok := ecc.mutation.ExtensionID(); !ok {
 		return &ValidationError{Name: "extension_id", err: errors.New(`ent: missing required field "ExtensionClient.extension_id"`)}
 	}
+	if _, ok := ecc.mutation.ClientUID(); !ok {
+		return &ValidationError{Name: "client_uid", err: errors.New(`ent: missing required field "ExtensionClient.client_uid"`)}
+	}
 	if _, ok := ecc.mutation.LastAccessTime(); !ok {
 		return &ValidationError{Name: "last_access_time", err: errors.New(`ent: missing required field "ExtensionClient.last_access_time"`)}
 	}
@@ -159,6 +169,14 @@ func (ecc *ExtensionClientCreate) createSpec() (*ExtensionClient, *sqlgraph.Crea
 			Column: extensionclient.FieldExtensionID,
 		})
 		_node.ExtensionID = value
+	}
+	if value, ok := ecc.mutation.ClientUID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: extensionclient.FieldClientUID,
+		})
+		_node.ClientUID = value
 	}
 	if value, ok := ecc.mutation.LastAccessTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
