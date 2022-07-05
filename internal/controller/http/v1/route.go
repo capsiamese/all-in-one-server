@@ -10,6 +10,7 @@ import (
 type UseCase struct {
 	B usecase.Bark
 	P usecase.PushDeer
+	E *usecase.ExtensionUseCase
 }
 
 func NewRouter(e *gin.Engine, l logger.Interface, u *UseCase) {
@@ -24,5 +25,6 @@ func NewRouter(e *gin.Engine, l logger.Interface, u *UseCase) {
 	{
 		newBarkRouter(h, l, u.B)
 		newPushDeerRouter(h, l, u.P)
+		newExtensionRouter(h, l, u.E)
 	}
 }

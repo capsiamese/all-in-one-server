@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"notification/config"
+	"notification/ent"
 	v1 "notification/internal/controller/http/v1"
 	"notification/internal/usecase"
 	"notification/internal/usecase/repo/bark"
@@ -19,11 +19,11 @@ import (
 	"syscall"
 )
 
-func Run(cfg *config.Config) {
+func Run(cfg *config.Config) error {
 	// **** log
 	l, err := logger.New(cfg.Log.Level)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 	// **** log
 	// *** cache
@@ -44,29 +44,36 @@ func Run(cfg *config.Config) {
 		cfg.PG.User, cfg.PG.Password, cfg.PG.URL, cfg.PG.Port)
 	pg, err := postgres.New(dsn) //postgres.WithCache(r))
 	if err != nil {
-		l.Fatalln(err)
+		return err
 	}
 	defer pg.Close()
 	// **** db
 
+	entCli, err := ent.Open("postgres", dsn)
+	if err != nil {
+		return err
+	}
+
 	barkApns, err := webapi.NewBarkAPNs(l)
 	if err != nil {
-		l.Fatalln(err)
+		return err
 	}
 	pdApns, err := webapi.NewPushDeerAPNs(l)
 	if err != nil {
-		l.Fatalln(err)
+		return err
 	}
 
 	// **** service
 	barkUseCase := usecase.NewBark(bark.New(pg, l), barkApns)
 	pushDeerUseCase := usecase.NewPushDeer(pushdeer.New(pg, l), pdApns)
+	extensionUseCase := usecase.NewExtension(entCli)
 	// **** service
 
 	e := gin.New()
 	v1.NewRouter(e, l, &v1.UseCase{
 		B: barkUseCase,
 		P: pushDeerUseCase,
+		E: extensionUseCase,
 	})
 	ctx := context.WithValue(context.Background(), "logger", l)
 	httpServer := httpserver.New(e,
@@ -85,8 +92,5 @@ func Run(cfg *config.Config) {
 		l.Warningln("server notify:", s)
 	}
 
-	err = httpServer.Shutdown()
-	if err != nil {
-		l.Fatalln(err)
-	}
+	return httpServer.Shutdown()
 }

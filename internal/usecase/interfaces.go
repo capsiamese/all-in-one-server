@@ -24,7 +24,9 @@ type (
 	BarkWebAPI interface {
 		Push(context.Context, *entity.APNsMessage) error
 	}
+)
 
+type (
 	PushDeer interface {
 		ValidateToken(ctx context.Context, token string) error
 
@@ -74,5 +76,11 @@ type (
 	PushDeerWebAPI interface {
 		Push(context.Context, []*entity.Device, *entity.Message) error
 		Register(ctx context.Context, key string, c *websocket.Conn)
+	}
+)
+
+type (
+	Extension interface {
+		Register(ctx context.Context) error
 	}
 )
