@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"context"
+	"errors"
+	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 	"notification/ent"
 	"time"
 )
@@ -18,16 +21,20 @@ func NewExtension(cli *ent.Client) *ExtensionUseCase {
 	}
 }
 
-func (e *ExtensionUseCase) Register(ctx context.Context) error {
+func (e *ExtensionUseCase) Register(ctx context.Context, name, extensionID string) (*ent.ExtensionClient, error) {
 	ext, err := e.cli.ExtensionClient.
 		Create().
-		SetExtensionID("").
-		SetName("").
+		SetExtensionID(extensionID).
+		SetName(name).
 		SetLastAccessTime(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	_ = ext
-	return nil
+	return nil, nil
+}
+
+func (e *ExtensionUseCase) Connect(ctx context.Context, uid uuid.UUID, wsConn *websocket.Conn) error {
+	return errors.New("")
 }

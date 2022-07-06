@@ -16,10 +16,16 @@ import (
 	"notification/pkg/postgres"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 )
 
 func Run(cfg *config.Config) error {
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	wd = filepath.ToSlash(wd)
 	// **** log
 	l, err := logger.New(cfg.Log.Level)
 	if err != nil {
@@ -76,6 +82,7 @@ func Run(cfg *config.Config) error {
 		E: extensionUseCase,
 	})
 	ctx := context.WithValue(context.Background(), "logger", l)
+	ctx = context.WithValue(ctx, "rootDir", wd)
 	httpServer := httpserver.New(e,
 		httpserver.WithContext(ctx),
 		httpserver.WithAddr(cfg.Http.Addr),

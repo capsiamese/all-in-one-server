@@ -79,9 +79,9 @@ func Migrate(dsn, opt string) error {
 }
 
 func MigrateEnt(dsn string) error {
-	cli, err := ent.Open("postgres", dsn)
+	c, err := ent.Open("postgres", dsn)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return cli.Schema.Create(context.Background())
+	return c.Schema.Create(context.Background())
 }

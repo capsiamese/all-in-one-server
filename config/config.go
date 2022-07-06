@@ -41,7 +41,7 @@ func NewConfig(path string) (*Config, error) {
 		return nil, err
 	}
 	if c.Log.Level == "debug" {
-		spew.Dump(c) // output have bug
+		spew.Dump(c)
 	}
 	return c, err
 }

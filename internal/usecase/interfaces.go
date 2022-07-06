@@ -3,7 +3,9 @@ package usecase
 import (
 	"context"
 	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
+	"notification/ent"
 	"notification/internal/entity"
 )
 
@@ -81,6 +83,7 @@ type (
 
 type (
 	Extension interface {
-		Register(ctx context.Context) error
+		Register(ctx context.Context, name, extensionID string) (*ent.ExtensionClient, error)
+		Connect(ctx context.Context, uid uuid.UUID, wsConn *websocket.Conn) error
 	}
 )

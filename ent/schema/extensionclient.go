@@ -14,8 +14,8 @@ type ExtensionClient struct {
 // Fields of the ExtensionClient.
 func (ExtensionClient) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
-		field.String("extension_id"),
+		field.String("name").NotEmpty(),
+		field.String("extension_id").NotEmpty(),
 		field.UUID("client_uid", uuid.NewV4()).Unique(),
 		field.Time("last_access_time"),
 	}
