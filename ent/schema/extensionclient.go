@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	uuid "github.com/satori/go.uuid"
@@ -26,5 +27,11 @@ func (ExtensionClient) Fields() []ent.Field {
 func (ExtensionClient) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("groups", Group.Type),
+	}
+}
+
+func (ExtensionClient) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		edge.Annotation{StructTag: `swaggerignore:"true"`},
 	}
 }

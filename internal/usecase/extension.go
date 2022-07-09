@@ -57,3 +57,7 @@ func (e *ExtensionUseCase) Register(ctx context.Context, name, extensionID strin
 func (e *ExtensionUseCase) Connect(ctx context.Context, uid uuid.UUID, wsConn *websocket.Conn) error {
 	return errors.New("")
 }
+
+func (e *ExtensionUseCase) Add(ctx context.Context, name string, group ...*ent.Group) error {
+	return errors.New("implement me")
+}

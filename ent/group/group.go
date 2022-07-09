@@ -7,8 +7,12 @@ const (
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldUID holds the string denoting the uid field in the database.
+	FieldUID = "uid"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// FieldShareURL holds the string denoting the share_url field in the database.
 	FieldShareURL = "share_url"
 	// FieldOption holds the string denoting the option field in the database.
@@ -38,7 +42,9 @@ const (
 // Columns holds all SQL columns for group fields.
 var Columns = []string{
 	FieldID,
+	FieldUID,
 	FieldName,
+	FieldCreatedAt,
 	FieldShareURL,
 	FieldOption,
 }

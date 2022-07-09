@@ -604,7 +604,9 @@ type GroupMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	uid           *uuid.UUID
 	name          *string
+	created_at    *time.Time
 	share_url     *string
 	option        *entity.GroupOption
 	clearedFields map[string]struct{}
@@ -716,6 +718,42 @@ func (m *GroupMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetUID sets the "uid" field.
+func (m *GroupMutation) SetUID(u uuid.UUID) {
+	m.uid = &u
+}
+
+// UID returns the value of the "uid" field in the mutation.
+func (m *GroupMutation) UID() (r uuid.UUID, exists bool) {
+	v := m.uid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUID returns the old "uid" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldUID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUID: %w", err)
+	}
+	return oldValue.UID, nil
+}
+
+// ResetUID resets all changes to the "uid" field.
+func (m *GroupMutation) ResetUID() {
+	m.uid = nil
+}
+
 // SetName sets the "name" field.
 func (m *GroupMutation) SetName(s string) {
 	m.name = &s
@@ -750,6 +788,42 @@ func (m *GroupMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *GroupMutation) ResetName() {
 	m.name = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *GroupMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *GroupMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *GroupMutation) ResetCreatedAt() {
+	m.created_at = nil
 }
 
 // SetShareURL sets the "share_url" field.
@@ -962,9 +1036,15 @@ func (m *GroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
+	if m.uid != nil {
+		fields = append(fields, group.FieldUID)
+	}
 	if m.name != nil {
 		fields = append(fields, group.FieldName)
+	}
+	if m.created_at != nil {
+		fields = append(fields, group.FieldCreatedAt)
 	}
 	if m.share_url != nil {
 		fields = append(fields, group.FieldShareURL)
@@ -980,8 +1060,12 @@ func (m *GroupMutation) Fields() []string {
 // schema.
 func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case group.FieldUID:
+		return m.UID()
 	case group.FieldName:
 		return m.Name()
+	case group.FieldCreatedAt:
+		return m.CreatedAt()
 	case group.FieldShareURL:
 		return m.ShareURL()
 	case group.FieldOption:
@@ -995,8 +1079,12 @@ func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case group.FieldUID:
+		return m.OldUID(ctx)
 	case group.FieldName:
 		return m.OldName(ctx)
+	case group.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
 	case group.FieldShareURL:
 		return m.OldShareURL(ctx)
 	case group.FieldOption:
@@ -1010,12 +1098,26 @@ func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *GroupMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case group.FieldUID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUID(v)
+		return nil
 	case group.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case group.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
 		return nil
 	case group.FieldShareURL:
 		v, ok := value.(string)
@@ -1095,8 +1197,14 @@ func (m *GroupMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *GroupMutation) ResetField(name string) error {
 	switch name {
+	case group.FieldUID:
+		m.ResetUID()
+		return nil
 	case group.FieldName:
 		m.ResetName()
+		return nil
+	case group.FieldCreatedAt:
+		m.ResetCreatedAt()
 		return nil
 	case group.FieldShareURL:
 		m.ResetShareURL()

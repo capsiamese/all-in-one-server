@@ -11,10 +11,13 @@ import (
 	"notification/ent/predicate"
 	"notification/ent/tab"
 	"notification/internal/entity"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // GroupUpdate is the builder for updating Group entities.
@@ -30,9 +33,21 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
+// SetUID sets the "uid" field.
+func (gu *GroupUpdate) SetUID(u uuid.UUID) *GroupUpdate {
+	gu.mutation.SetUID(u)
+	return gu
+}
+
 // SetName sets the "name" field.
 func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	gu.mutation.SetName(s)
+	return gu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (gu *GroupUpdate) SetCreatedAt(t time.Time) *GroupUpdate {
+	gu.mutation.SetCreatedAt(t)
 	return gu
 }
 
@@ -214,11 +229,25 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := gu.mutation.UID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: group.FieldUID,
+		})
+	}
 	if value, ok := gu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
 			Column: group.FieldName,
+		})
+	}
+	if value, ok := gu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: group.FieldCreatedAt,
 		})
 	}
 	if value, ok := gu.mutation.ShareURL(); ok {
@@ -355,9 +384,21 @@ type GroupUpdateOne struct {
 	mutation *GroupMutation
 }
 
+// SetUID sets the "uid" field.
+func (guo *GroupUpdateOne) SetUID(u uuid.UUID) *GroupUpdateOne {
+	guo.mutation.SetUID(u)
+	return guo
+}
+
 // SetName sets the "name" field.
 func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	guo.mutation.SetName(s)
+	return guo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (guo *GroupUpdateOne) SetCreatedAt(t time.Time) *GroupUpdateOne {
+	guo.mutation.SetCreatedAt(t)
 	return guo
 }
 
@@ -563,11 +604,25 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			}
 		}
 	}
+	if value, ok := guo.mutation.UID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: group.FieldUID,
+		})
+	}
 	if value, ok := guo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
 			Column: group.FieldName,
+		})
+	}
+	if value, ok := guo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: group.FieldCreatedAt,
 		})
 	}
 	if value, ok := guo.mutation.ShareURL(); ok {

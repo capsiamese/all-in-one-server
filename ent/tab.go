@@ -27,7 +27,7 @@ type Tab struct {
 	Favicon string `json:"favicon,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TabQuery when eager-loading is set.
-	Edges      TabEdges `json:"edges"`
+	Edges      TabEdges `json:"edges" swaggerignore:"true"`
 	group_tabs *int
 }
 

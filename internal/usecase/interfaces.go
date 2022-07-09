@@ -84,6 +84,8 @@ type (
 type (
 	Extension interface {
 		Register(ctx context.Context, name, extensionID string) (*ent.ExtensionClient, error)
+		Add(ctx context.Context, name string, group ...*ent.Group) error
+
 		Connect(ctx context.Context, uid uuid.UUID, wsConn *websocket.Conn) error
 	}
 )

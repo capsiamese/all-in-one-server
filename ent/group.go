@@ -9,8 +9,11 @@ import (
 	"notification/ent/group"
 	"notification/internal/entity"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // Group is the model entity for the Group schema.
@@ -18,15 +21,19 @@ type Group struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// UID holds the value of the "uid" field.
+	UID uuid.UUID `json:"uid,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// ShareURL holds the value of the "share_url" field.
 	ShareURL string `json:"share_url,omitempty"`
 	// Option holds the value of the "option" field.
 	Option entity.GroupOption `json:"option,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
-	Edges                   GroupEdges `json:"edges"`
+	Edges                   GroupEdges `json:"edges" swaggerignore:"true"`
 	extension_client_groups *int
 }
 
@@ -75,6 +82,10 @@ func (*Group) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case group.FieldName, group.FieldShareURL:
 			values[i] = new(sql.NullString)
+		case group.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
+		case group.FieldUID:
+			values[i] = new(uuid.UUID)
 		case group.ForeignKeys[0]: // extension_client_groups
 			values[i] = new(sql.NullInt64)
 		default:
@@ -98,11 +109,23 @@ func (gr *Group) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			gr.ID = int(value.Int64)
+		case group.FieldUID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field uid", values[i])
+			} else if value != nil {
+				gr.UID = *value
+			}
 		case group.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				gr.Name = value.String
+			}
+		case group.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				gr.CreatedAt = value.Time
 			}
 		case group.FieldShareURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -163,8 +186,12 @@ func (gr *Group) String() string {
 	var builder strings.Builder
 	builder.WriteString("Group(")
 	builder.WriteString(fmt.Sprintf("id=%v", gr.ID))
+	builder.WriteString(", uid=")
+	builder.WriteString(fmt.Sprintf("%v", gr.UID))
 	builder.WriteString(", name=")
 	builder.WriteString(gr.Name)
+	builder.WriteString(", created_at=")
+	builder.WriteString(gr.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", share_url=")
 	builder.WriteString(gr.ShareURL)
 	builder.WriteString(", option=")

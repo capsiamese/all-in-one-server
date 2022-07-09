@@ -9,16 +9,26 @@ definitions:
       error:
         type: string
     type: object
-  entity.GroupInfo:
+  ent.Group:
     properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
       name:
+        description: Name holds the value of the "name" field.
         type: string
       option:
         $ref: '#/definitions/entity.GroupOption'
-      tabs:
-        items:
-          $ref: '#/definitions/entity.Tab'
-        type: array
+        description: Option holds the value of the "option" field.
+      share_url:
+        description: ShareURL holds the value of the "share_url" field.
+        type: string
+      uid:
+        description: UID holds the value of the "uid" field.
+        type: string
     type: object
   entity.GroupOption:
     properties:
@@ -26,15 +36,6 @@ definitions:
         items:
           type: string
         type: array
-    type: object
-  entity.Tab:
-    properties:
-      favicon:
-        type: string
-      name:
-        type: string
-      url:
-        type: string
     type: object
 host: localhost:8080
 info:
@@ -50,24 +51,19 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /ext/{uid}:
+  /v1/ext/{uid}:
     post:
       consumes:
       - application/json
       description: store one or more tab group
       parameters:
-      - description: client uid
-        in: path
-        name: uid
-        required: true
-        type: string
       - description: groups
         in: body
         name: groups
         required: true
         schema:
           items:
-            $ref: '#/definitions/entity.GroupInfo'
+            $ref: '#/definitions/ent.Group'
           type: array
       produces:
       - application/json
@@ -83,7 +79,7 @@ paths:
               type: object
       tags:
       - add
-  /ext/register:
+  /v1/ext/register:
     post:
       description: get uid
       parameters:

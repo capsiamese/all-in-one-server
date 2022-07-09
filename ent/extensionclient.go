@@ -28,7 +28,7 @@ type ExtensionClient struct {
 	LastAccessTime time.Time `json:"last_access_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ExtensionClientQuery when eager-loading is set.
-	Edges ExtensionClientEdges `json:"edges"`
+	Edges ExtensionClientEdges `json:"edges" swaggerignore:"true"`
 }
 
 // ExtensionClientEdges holds the relations/edges for other nodes in the graph.

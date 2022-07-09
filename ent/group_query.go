@@ -329,12 +329,12 @@ func (gq *GroupQuery) WithClient(opts ...func(*ExtensionClientQuery)) *GroupQuer
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		UID uuid.UUID `json:"uid,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Group.Query().
-//		GroupBy(group.FieldName).
+//		GroupBy(group.FieldUID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -356,11 +356,11 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		UID uuid.UUID `json:"uid,omitempty"`
 //	}
 //
 //	client.Group.Query().
-//		Select(group.FieldName).
+//		Select(group.FieldUID).
 //		Scan(ctx, &v)
 //
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {

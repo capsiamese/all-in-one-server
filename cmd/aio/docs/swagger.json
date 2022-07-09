@@ -18,7 +18,7 @@
     "host": "localhost:8080",
     "basePath": "/v1",
     "paths": {
-        "/ext/register": {
+        "/v1/ext/register": {
             "post": {
                 "description": "get uid",
                 "produces": [
@@ -81,7 +81,7 @@
                 }
             }
         },
-        "/ext/{uid}": {
+        "/v1/ext/{uid}": {
             "post": {
                 "description": "store one or more tab group",
                 "consumes": [
@@ -95,13 +95,6 @@
                 ],
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "client uid",
-                        "name": "uid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "groups",
                         "name": "groups",
                         "in": "body",
@@ -109,7 +102,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.GroupInfo"
+                                "$ref": "#/definitions/ent.Group"
                             }
                         }
                     }
@@ -152,20 +145,32 @@
                 }
             }
         },
-        "entity.GroupInfo": {
+        "ent.Group": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "description": "CreatedAt holds the value of the \"created_at\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
                 "name": {
+                    "description": "Name holds the value of the \"name\" field.",
                     "type": "string"
                 },
                 "option": {
+                    "description": "Option holds the value of the \"option\" field.",
                     "$ref": "#/definitions/entity.GroupOption"
                 },
-                "tabs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.Tab"
-                    }
+                "share_url": {
+                    "description": "ShareURL holds the value of the \"share_url\" field.",
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "UID holds the value of the \"uid\" field.",
+                    "type": "string"
                 }
             }
         },
@@ -177,20 +182,6 @@
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "entity.Tab": {
-            "type": "object",
-            "properties": {
-                "favicon": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         }

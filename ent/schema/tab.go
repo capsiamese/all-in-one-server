@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -25,5 +26,11 @@ func (Tab) Fields() []ent.Field {
 func (Tab) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("group", Group.Type).Ref("tabs").Unique(),
+	}
+}
+
+func (Tab) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		edge.Annotation{StructTag: `swaggerignore:"true"`},
 	}
 }

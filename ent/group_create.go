@@ -10,9 +10,12 @@ import (
 	"notification/ent/group"
 	"notification/ent/tab"
 	"notification/internal/entity"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -22,9 +25,21 @@ type GroupCreate struct {
 	hooks    []Hook
 }
 
+// SetUID sets the "uid" field.
+func (gc *GroupCreate) SetUID(u uuid.UUID) *GroupCreate {
+	gc.mutation.SetUID(u)
+	return gc
+}
+
 // SetName sets the "name" field.
 func (gc *GroupCreate) SetName(s string) *GroupCreate {
 	gc.mutation.SetName(s)
+	return gc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (gc *GroupCreate) SetCreatedAt(t time.Time) *GroupCreate {
+	gc.mutation.SetCreatedAt(t)
 	return gc
 }
 
@@ -160,8 +175,14 @@ func (gc *GroupCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.UID(); !ok {
+		return &ValidationError{Name: "uid", err: errors.New(`ent: missing required field "Group.uid"`)}
+	}
 	if _, ok := gc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
+	}
+	if _, ok := gc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Group.created_at"`)}
 	}
 	return nil
 }
@@ -190,6 +211,14 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := gc.mutation.UID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: group.FieldUID,
+		})
+		_node.UID = value
+	}
 	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -197,6 +226,14 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Column: group.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := gc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: group.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
 	}
 	if value, ok := gc.mutation.ShareURL(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
