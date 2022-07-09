@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"notification/ent/extensionclient"
+	"notification/ent/group"
 	"notification/ent/predicate"
-	"notification/ent/tabhistory"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -55,19 +55,19 @@ func (ecu *ExtensionClientUpdate) SetLastAccessTime(t time.Time) *ExtensionClien
 	return ecu
 }
 
-// AddHistoryIDs adds the "histories" edge to the TabHistory entity by IDs.
-func (ecu *ExtensionClientUpdate) AddHistoryIDs(ids ...int) *ExtensionClientUpdate {
-	ecu.mutation.AddHistoryIDs(ids...)
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (ecu *ExtensionClientUpdate) AddGroupIDs(ids ...int) *ExtensionClientUpdate {
+	ecu.mutation.AddGroupIDs(ids...)
 	return ecu
 }
 
-// AddHistories adds the "histories" edges to the TabHistory entity.
-func (ecu *ExtensionClientUpdate) AddHistories(t ...*TabHistory) *ExtensionClientUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddGroups adds the "groups" edges to the Group entity.
+func (ecu *ExtensionClientUpdate) AddGroups(g ...*Group) *ExtensionClientUpdate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
 	}
-	return ecu.AddHistoryIDs(ids...)
+	return ecu.AddGroupIDs(ids...)
 }
 
 // Mutation returns the ExtensionClientMutation object of the builder.
@@ -75,25 +75,25 @@ func (ecu *ExtensionClientUpdate) Mutation() *ExtensionClientMutation {
 	return ecu.mutation
 }
 
-// ClearHistories clears all "histories" edges to the TabHistory entity.
-func (ecu *ExtensionClientUpdate) ClearHistories() *ExtensionClientUpdate {
-	ecu.mutation.ClearHistories()
+// ClearGroups clears all "groups" edges to the Group entity.
+func (ecu *ExtensionClientUpdate) ClearGroups() *ExtensionClientUpdate {
+	ecu.mutation.ClearGroups()
 	return ecu
 }
 
-// RemoveHistoryIDs removes the "histories" edge to TabHistory entities by IDs.
-func (ecu *ExtensionClientUpdate) RemoveHistoryIDs(ids ...int) *ExtensionClientUpdate {
-	ecu.mutation.RemoveHistoryIDs(ids...)
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
+func (ecu *ExtensionClientUpdate) RemoveGroupIDs(ids ...int) *ExtensionClientUpdate {
+	ecu.mutation.RemoveGroupIDs(ids...)
 	return ecu
 }
 
-// RemoveHistories removes "histories" edges to TabHistory entities.
-func (ecu *ExtensionClientUpdate) RemoveHistories(t ...*TabHistory) *ExtensionClientUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveGroups removes "groups" edges to Group entities.
+func (ecu *ExtensionClientUpdate) RemoveGroups(g ...*Group) *ExtensionClientUpdate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
 	}
-	return ecu.RemoveHistoryIDs(ids...)
+	return ecu.RemoveGroupIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -217,33 +217,33 @@ func (ecu *ExtensionClientUpdate) sqlSave(ctx context.Context) (n int, err error
 			Column: extensionclient.FieldLastAccessTime,
 		})
 	}
-	if ecu.mutation.HistoriesCleared() {
+	if ecu.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   extensionclient.HistoriesTable,
-			Columns: []string{extensionclient.HistoriesColumn},
+			Table:   extensionclient.GroupsTable,
+			Columns: []string{extensionclient.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: tabhistory.FieldID,
+					Column: group.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ecu.mutation.RemovedHistoriesIDs(); len(nodes) > 0 && !ecu.mutation.HistoriesCleared() {
+	if nodes := ecu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !ecu.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   extensionclient.HistoriesTable,
-			Columns: []string{extensionclient.HistoriesColumn},
+			Table:   extensionclient.GroupsTable,
+			Columns: []string{extensionclient.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: tabhistory.FieldID,
+					Column: group.FieldID,
 				},
 			},
 		}
@@ -252,17 +252,17 @@ func (ecu *ExtensionClientUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ecu.mutation.HistoriesIDs(); len(nodes) > 0 {
+	if nodes := ecu.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   extensionclient.HistoriesTable,
-			Columns: []string{extensionclient.HistoriesColumn},
+			Table:   extensionclient.GroupsTable,
+			Columns: []string{extensionclient.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: tabhistory.FieldID,
+					Column: group.FieldID,
 				},
 			},
 		}
@@ -314,19 +314,19 @@ func (ecuo *ExtensionClientUpdateOne) SetLastAccessTime(t time.Time) *ExtensionC
 	return ecuo
 }
 
-// AddHistoryIDs adds the "histories" edge to the TabHistory entity by IDs.
-func (ecuo *ExtensionClientUpdateOne) AddHistoryIDs(ids ...int) *ExtensionClientUpdateOne {
-	ecuo.mutation.AddHistoryIDs(ids...)
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (ecuo *ExtensionClientUpdateOne) AddGroupIDs(ids ...int) *ExtensionClientUpdateOne {
+	ecuo.mutation.AddGroupIDs(ids...)
 	return ecuo
 }
 
-// AddHistories adds the "histories" edges to the TabHistory entity.
-func (ecuo *ExtensionClientUpdateOne) AddHistories(t ...*TabHistory) *ExtensionClientUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddGroups adds the "groups" edges to the Group entity.
+func (ecuo *ExtensionClientUpdateOne) AddGroups(g ...*Group) *ExtensionClientUpdateOne {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
 	}
-	return ecuo.AddHistoryIDs(ids...)
+	return ecuo.AddGroupIDs(ids...)
 }
 
 // Mutation returns the ExtensionClientMutation object of the builder.
@@ -334,25 +334,25 @@ func (ecuo *ExtensionClientUpdateOne) Mutation() *ExtensionClientMutation {
 	return ecuo.mutation
 }
 
-// ClearHistories clears all "histories" edges to the TabHistory entity.
-func (ecuo *ExtensionClientUpdateOne) ClearHistories() *ExtensionClientUpdateOne {
-	ecuo.mutation.ClearHistories()
+// ClearGroups clears all "groups" edges to the Group entity.
+func (ecuo *ExtensionClientUpdateOne) ClearGroups() *ExtensionClientUpdateOne {
+	ecuo.mutation.ClearGroups()
 	return ecuo
 }
 
-// RemoveHistoryIDs removes the "histories" edge to TabHistory entities by IDs.
-func (ecuo *ExtensionClientUpdateOne) RemoveHistoryIDs(ids ...int) *ExtensionClientUpdateOne {
-	ecuo.mutation.RemoveHistoryIDs(ids...)
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
+func (ecuo *ExtensionClientUpdateOne) RemoveGroupIDs(ids ...int) *ExtensionClientUpdateOne {
+	ecuo.mutation.RemoveGroupIDs(ids...)
 	return ecuo
 }
 
-// RemoveHistories removes "histories" edges to TabHistory entities.
-func (ecuo *ExtensionClientUpdateOne) RemoveHistories(t ...*TabHistory) *ExtensionClientUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveGroups removes "groups" edges to Group entities.
+func (ecuo *ExtensionClientUpdateOne) RemoveGroups(g ...*Group) *ExtensionClientUpdateOne {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
 	}
-	return ecuo.RemoveHistoryIDs(ids...)
+	return ecuo.RemoveGroupIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -500,33 +500,33 @@ func (ecuo *ExtensionClientUpdateOne) sqlSave(ctx context.Context) (_node *Exten
 			Column: extensionclient.FieldLastAccessTime,
 		})
 	}
-	if ecuo.mutation.HistoriesCleared() {
+	if ecuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   extensionclient.HistoriesTable,
-			Columns: []string{extensionclient.HistoriesColumn},
+			Table:   extensionclient.GroupsTable,
+			Columns: []string{extensionclient.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: tabhistory.FieldID,
+					Column: group.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ecuo.mutation.RemovedHistoriesIDs(); len(nodes) > 0 && !ecuo.mutation.HistoriesCleared() {
+	if nodes := ecuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !ecuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   extensionclient.HistoriesTable,
-			Columns: []string{extensionclient.HistoriesColumn},
+			Table:   extensionclient.GroupsTable,
+			Columns: []string{extensionclient.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: tabhistory.FieldID,
+					Column: group.FieldID,
 				},
 			},
 		}
@@ -535,17 +535,17 @@ func (ecuo *ExtensionClientUpdateOne) sqlSave(ctx context.Context) (_node *Exten
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ecuo.mutation.HistoriesIDs(); len(nodes) > 0 {
+	if nodes := ecuo.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   extensionclient.HistoriesTable,
-			Columns: []string{extensionclient.HistoriesColumn},
+			Table:   extensionclient.GroupsTable,
+			Columns: []string{extensionclient.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: tabhistory.FieldID,
+					Column: group.FieldID,
 				},
 			},
 		}

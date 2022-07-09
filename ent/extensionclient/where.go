@@ -496,25 +496,25 @@ func LastAccessTimeLTE(v time.Time) predicate.ExtensionClient {
 	})
 }
 
-// HasHistories applies the HasEdge predicate on the "histories" edge.
-func HasHistories() predicate.ExtensionClient {
+// HasGroups applies the HasEdge predicate on the "groups" edge.
+func HasGroups() predicate.ExtensionClient {
 	return predicate.ExtensionClient(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(HistoriesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, HistoriesTable, HistoriesColumn),
+			sqlgraph.To(GroupsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, GroupsTable, GroupsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasHistoriesWith applies the HasEdge predicate on the "histories" edge with a given conditions (other predicates).
-func HasHistoriesWith(preds ...predicate.TabHistory) predicate.ExtensionClient {
+// HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
+func HasGroupsWith(preds ...predicate.Group) predicate.ExtensionClient {
 	return predicate.ExtensionClient(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(HistoriesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, HistoriesTable, HistoriesColumn),
+			sqlgraph.To(GroupsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, GroupsTable, GroupsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -15,17 +15,17 @@ const (
 	FieldClientUID = "client_uid"
 	// FieldLastAccessTime holds the string denoting the last_access_time field in the database.
 	FieldLastAccessTime = "last_access_time"
-	// EdgeHistories holds the string denoting the histories edge name in mutations.
-	EdgeHistories = "histories"
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
 	// Table holds the table name of the extensionclient in the database.
 	Table = "extension_clients"
-	// HistoriesTable is the table that holds the histories relation/edge.
-	HistoriesTable = "tab_histories"
-	// HistoriesInverseTable is the table name for the TabHistory entity.
-	// It exists in this package in order to avoid circular dependency with the "tabhistory" package.
-	HistoriesInverseTable = "tab_histories"
-	// HistoriesColumn is the table column denoting the histories relation/edge.
-	HistoriesColumn = "extension_client_histories"
+	// GroupsTable is the table that holds the groups relation/edge.
+	GroupsTable = "groups"
+	// GroupsInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	GroupsInverseTable = "groups"
+	// GroupsColumn is the table column denoting the groups relation/edge.
+	GroupsColumn = "extension_client_groups"
 )
 
 // Columns holds all SQL columns for extensionclient fields.

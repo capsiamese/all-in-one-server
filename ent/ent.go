@@ -6,7 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"notification/ent/extensionclient"
-	"notification/ent/tabhistory"
+	"notification/ent/group"
+	"notification/ent/tab"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -31,7 +32,8 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		extensionclient.Table: extensionclient.ValidColumn,
-		tabhistory.Table:      tabhistory.ValidColumn,
+		group.Table:           group.ValidColumn,
+		tab.Table:             tab.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

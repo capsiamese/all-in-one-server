@@ -9,5 +9,8 @@ import (
 // ExtensionClient is the predicate function for extensionclient builders.
 type ExtensionClient func(*sql.Selector)
 
-// TabHistory is the predicate function for tabhistory builders.
-type TabHistory func(*sql.Selector)
+// Group is the predicate function for group builders.
+type Group func(*sql.Selector)
+
+// Tab is the predicate function for tab builders.
+type Tab func(*sql.Selector)

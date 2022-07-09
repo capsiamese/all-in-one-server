@@ -10,7 +10,8 @@ import (
 	"notification/ent/migrate"
 
 	"notification/ent/extensionclient"
-	"notification/ent/tabhistory"
+	"notification/ent/group"
+	"notification/ent/tab"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -24,8 +25,10 @@ type Client struct {
 	Schema *migrate.Schema
 	// ExtensionClient is the client for interacting with the ExtensionClient builders.
 	ExtensionClient *ExtensionClientClient
-	// TabHistory is the client for interacting with the TabHistory builders.
-	TabHistory *TabHistoryClient
+	// Group is the client for interacting with the Group builders.
+	Group *GroupClient
+	// Tab is the client for interacting with the Tab builders.
+	Tab *TabClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -40,7 +43,8 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.ExtensionClient = NewExtensionClientClient(c.config)
-	c.TabHistory = NewTabHistoryClient(c.config)
+	c.Group = NewGroupClient(c.config)
+	c.Tab = NewTabClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -75,7 +79,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:             ctx,
 		config:          cfg,
 		ExtensionClient: NewExtensionClientClient(cfg),
-		TabHistory:      NewTabHistoryClient(cfg),
+		Group:           NewGroupClient(cfg),
+		Tab:             NewTabClient(cfg),
 	}, nil
 }
 
@@ -96,7 +101,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:             ctx,
 		config:          cfg,
 		ExtensionClient: NewExtensionClientClient(cfg),
-		TabHistory:      NewTabHistoryClient(cfg),
+		Group:           NewGroupClient(cfg),
+		Tab:             NewTabClient(cfg),
 	}, nil
 }
 
@@ -127,7 +133,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.ExtensionClient.Use(hooks...)
-	c.TabHistory.Use(hooks...)
+	c.Group.Use(hooks...)
+	c.Tab.Use(hooks...)
 }
 
 // ExtensionClientClient is a client for the ExtensionClient schema.
@@ -215,15 +222,15 @@ func (c *ExtensionClientClient) GetX(ctx context.Context, id int) *ExtensionClie
 	return obj
 }
 
-// QueryHistories queries the histories edge of a ExtensionClient.
-func (c *ExtensionClientClient) QueryHistories(ec *ExtensionClient) *TabHistoryQuery {
-	query := &TabHistoryQuery{config: c.config}
+// QueryGroups queries the groups edge of a ExtensionClient.
+func (c *ExtensionClientClient) QueryGroups(ec *ExtensionClient) *GroupQuery {
+	query := &GroupQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := ec.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(extensionclient.Table, extensionclient.FieldID, id),
-			sqlgraph.To(tabhistory.Table, tabhistory.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, extensionclient.HistoriesTable, extensionclient.HistoriesColumn),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, extensionclient.GroupsTable, extensionclient.GroupsColumn),
 		)
 		fromV = sqlgraph.Neighbors(ec.driver.Dialect(), step)
 		return fromV, nil
@@ -236,84 +243,84 @@ func (c *ExtensionClientClient) Hooks() []Hook {
 	return c.hooks.ExtensionClient
 }
 
-// TabHistoryClient is a client for the TabHistory schema.
-type TabHistoryClient struct {
+// GroupClient is a client for the Group schema.
+type GroupClient struct {
 	config
 }
 
-// NewTabHistoryClient returns a client for the TabHistory from the given config.
-func NewTabHistoryClient(c config) *TabHistoryClient {
-	return &TabHistoryClient{config: c}
+// NewGroupClient returns a client for the Group from the given config.
+func NewGroupClient(c config) *GroupClient {
+	return &GroupClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `tabhistory.Hooks(f(g(h())))`.
-func (c *TabHistoryClient) Use(hooks ...Hook) {
-	c.hooks.TabHistory = append(c.hooks.TabHistory, hooks...)
+// A call to `Use(f, g, h)` equals to `group.Hooks(f(g(h())))`.
+func (c *GroupClient) Use(hooks ...Hook) {
+	c.hooks.Group = append(c.hooks.Group, hooks...)
 }
 
-// Create returns a create builder for TabHistory.
-func (c *TabHistoryClient) Create() *TabHistoryCreate {
-	mutation := newTabHistoryMutation(c.config, OpCreate)
-	return &TabHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Group.
+func (c *GroupClient) Create() *GroupCreate {
+	mutation := newGroupMutation(c.config, OpCreate)
+	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of TabHistory entities.
-func (c *TabHistoryClient) CreateBulk(builders ...*TabHistoryCreate) *TabHistoryCreateBulk {
-	return &TabHistoryCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for TabHistory.
-func (c *TabHistoryClient) Update() *TabHistoryUpdate {
-	mutation := newTabHistoryMutation(c.config, OpUpdate)
-	return &TabHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Group.
+func (c *GroupClient) Update() *GroupUpdate {
+	mutation := newGroupMutation(c.config, OpUpdate)
+	return &GroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *TabHistoryClient) UpdateOne(th *TabHistory) *TabHistoryUpdateOne {
-	mutation := newTabHistoryMutation(c.config, OpUpdateOne, withTabHistory(th))
-	return &TabHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroup(gr))
+	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TabHistoryClient) UpdateOneID(id int) *TabHistoryUpdateOne {
-	mutation := newTabHistoryMutation(c.config, OpUpdateOne, withTabHistoryID(id))
-	return &TabHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
+	mutation := newGroupMutation(c.config, OpUpdateOne, withGroupID(id))
+	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for TabHistory.
-func (c *TabHistoryClient) Delete() *TabHistoryDelete {
-	mutation := newTabHistoryMutation(c.config, OpDelete)
-	return &TabHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Group.
+func (c *GroupClient) Delete() *GroupDelete {
+	mutation := newGroupMutation(c.config, OpDelete)
+	return &GroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *TabHistoryClient) DeleteOne(th *TabHistory) *TabHistoryDeleteOne {
-	return c.DeleteOneID(th.ID)
+func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
+	return c.DeleteOneID(gr.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TabHistoryClient) DeleteOneID(id int) *TabHistoryDeleteOne {
-	builder := c.Delete().Where(tabhistory.ID(id))
+func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
+	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &TabHistoryDeleteOne{builder}
+	return &GroupDeleteOne{builder}
 }
 
-// Query returns a query builder for TabHistory.
-func (c *TabHistoryClient) Query() *TabHistoryQuery {
-	return &TabHistoryQuery{
+// Query returns a query builder for Group.
+func (c *GroupClient) Query() *GroupQuery {
+	return &GroupQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a TabHistory entity by its id.
-func (c *TabHistoryClient) Get(ctx context.Context, id int) (*TabHistory, error) {
-	return c.Query().Where(tabhistory.ID(id)).Only(ctx)
+// Get returns a Group entity by its id.
+func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
+	return c.Query().Where(group.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TabHistoryClient) GetX(ctx context.Context, id int) *TabHistory {
+func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -321,23 +328,145 @@ func (c *TabHistoryClient) GetX(ctx context.Context, id int) *TabHistory {
 	return obj
 }
 
-// QueryHistoryList queries the history_list edge of a TabHistory.
-func (c *TabHistoryClient) QueryHistoryList(th *TabHistory) *ExtensionClientQuery {
+// QueryTabs queries the tabs edge of a Group.
+func (c *GroupClient) QueryTabs(gr *Group) *TabQuery {
+	query := &TabQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(tab.Table, tab.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.TabsTable, group.TabsColumn),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryClient queries the client edge of a Group.
+func (c *GroupClient) QueryClient(gr *Group) *ExtensionClientQuery {
 	query := &ExtensionClientQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := th.ID
+		id := gr.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(tabhistory.Table, tabhistory.FieldID, id),
+			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(extensionclient.Table, extensionclient.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, tabhistory.HistoryListTable, tabhistory.HistoryListColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, group.ClientTable, group.ClientColumn),
 		)
-		fromV = sqlgraph.Neighbors(th.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *TabHistoryClient) Hooks() []Hook {
-	return c.hooks.TabHistory
+func (c *GroupClient) Hooks() []Hook {
+	return c.hooks.Group
+}
+
+// TabClient is a client for the Tab schema.
+type TabClient struct {
+	config
+}
+
+// NewTabClient returns a client for the Tab from the given config.
+func NewTabClient(c config) *TabClient {
+	return &TabClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tab.Hooks(f(g(h())))`.
+func (c *TabClient) Use(hooks ...Hook) {
+	c.hooks.Tab = append(c.hooks.Tab, hooks...)
+}
+
+// Create returns a create builder for Tab.
+func (c *TabClient) Create() *TabCreate {
+	mutation := newTabMutation(c.config, OpCreate)
+	return &TabCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Tab entities.
+func (c *TabClient) CreateBulk(builders ...*TabCreate) *TabCreateBulk {
+	return &TabCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Tab.
+func (c *TabClient) Update() *TabUpdate {
+	mutation := newTabMutation(c.config, OpUpdate)
+	return &TabUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TabClient) UpdateOne(t *Tab) *TabUpdateOne {
+	mutation := newTabMutation(c.config, OpUpdateOne, withTab(t))
+	return &TabUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TabClient) UpdateOneID(id int) *TabUpdateOne {
+	mutation := newTabMutation(c.config, OpUpdateOne, withTabID(id))
+	return &TabUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Tab.
+func (c *TabClient) Delete() *TabDelete {
+	mutation := newTabMutation(c.config, OpDelete)
+	return &TabDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TabClient) DeleteOne(t *Tab) *TabDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TabClient) DeleteOneID(id int) *TabDeleteOne {
+	builder := c.Delete().Where(tab.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TabDeleteOne{builder}
+}
+
+// Query returns a query builder for Tab.
+func (c *TabClient) Query() *TabQuery {
+	return &TabQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Tab entity by its id.
+func (c *TabClient) Get(ctx context.Context, id int) (*Tab, error) {
+	return c.Query().Where(tab.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TabClient) GetX(ctx context.Context, id int) *Tab {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGroup queries the group edge of a Tab.
+func (c *TabClient) QueryGroup(t *Tab) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tab.Table, tab.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, tab.GroupTable, tab.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TabClient) Hooks() []Hook {
+	return c.hooks.Tab
 }

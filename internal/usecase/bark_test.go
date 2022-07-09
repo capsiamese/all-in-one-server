@@ -1,4 +1,4 @@
-package usecase
+package usecase_test
 
 import (
 	"context"
@@ -6,8 +6,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"notification/internal/entity"
+	"notification/internal/usecase"
 	"testing"
 )
+
+//go:generate mockgen -source=interfaces.go -package=usecase_test -destination=mocks_test.go
 
 type test struct {
 	name string
@@ -20,13 +23,13 @@ var (
 	errEmptyDevice = fmt.Errorf("empty device")
 )
 
-func bark(t *testing.T) (*BarkUseCase, *MockBarkRepo) {
+func bark(t *testing.T) (*usecase.BarkUseCase, *MockBarkRepo) {
 	t.Helper()
 	ctl := gomock.NewController(t)
 	defer ctl.Finish()
 
 	repo := NewMockBarkRepo(ctl)
-	b := NewBark(repo, nil)
+	b := usecase.NewBark(repo, nil)
 	return b, repo
 }
 

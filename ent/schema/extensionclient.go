@@ -25,6 +25,6 @@ func (ExtensionClient) Fields() []ent.Field {
 // Edges of the ExtensionClient.
 func (ExtensionClient) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("histories", TabHistory.Type),
+		edge.To("groups", Group.Type),
 	}
 }

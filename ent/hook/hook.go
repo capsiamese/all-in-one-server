@@ -21,15 +21,28 @@ func (f ExtensionClientFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return f(ctx, mv)
 }
 
-// The TabHistoryFunc type is an adapter to allow the use of ordinary
-// function as TabHistory mutator.
-type TabHistoryFunc func(context.Context, *ent.TabHistoryMutation) (ent.Value, error)
+// The GroupFunc type is an adapter to allow the use of ordinary
+// function as Group mutator.
+type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f TabHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TabHistoryMutation)
+func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.GroupMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TabHistoryMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The TabFunc type is an adapter to allow the use of ordinary
+// function as Tab mutator.
+type TabFunc func(context.Context, *ent.TabMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TabFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TabMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TabMutation", m)
 	}
 	return f(ctx, mv)
 }

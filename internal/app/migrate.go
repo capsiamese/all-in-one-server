@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"log"
 	"notification/ent"
+	entMigrate "notification/ent/migrate"
 )
 
 var MigrateCmd = &cli.Command{
@@ -83,5 +84,10 @@ func MigrateEnt(dsn string) error {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return c.Schema.Create(context.Background())
+	ctx := context.Background()
+	return c.Schema.Create(ctx,
+		entMigrate.WithDropColumn(true),
+		entMigrate.WithGlobalUniqueID(true),
+		entMigrate.WithDropIndex(true),
+	)
 }

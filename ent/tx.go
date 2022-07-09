@@ -14,8 +14,10 @@ type Tx struct {
 	config
 	// ExtensionClient is the client for interacting with the ExtensionClient builders.
 	ExtensionClient *ExtensionClientClient
-	// TabHistory is the client for interacting with the TabHistory builders.
-	TabHistory *TabHistoryClient
+	// Group is the client for interacting with the Group builders.
+	Group *GroupClient
+	// Tab is the client for interacting with the Tab builders.
+	Tab *TabClient
 
 	// lazily loaded.
 	client     *Client
@@ -152,7 +154,8 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.ExtensionClient = NewExtensionClientClient(tx.config)
-	tx.TabHistory = NewTabHistoryClient(tx.config)
+	tx.Group = NewGroupClient(tx.config)
+	tx.Tab = NewTabClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

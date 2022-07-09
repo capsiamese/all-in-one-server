@@ -16,13 +16,16 @@ func newExtensionRouter(e *gin.RouterGroup, l logger.Interface, ext usecase.Exte
 	r := &extensionRoutes{e: ext, l: l}
 	g := e.Group("/ext")
 	{
-		g.POST("/register", r.Register)
-		g.Any("/connect", r.Connect)
+		g.POST("/register", r.register)
+		//g.Any("/connect", r.Connect)
+		g.GET("/:uid/:group", r.getGroup)
+		g.POST("/:uid", r.addGroup)
+		g.DELETE("/:uid/:group", r.removeGroup)
 	}
 }
 
-// Register godoc
-// @Summery      Register extension client
+// register godoc
+// @Summery      register extension client
 // @Description  get uid
 // @Tags         extension
 // @Param        name       query  string  true  "client name"   minlength(1)  maxlength(64)
@@ -30,7 +33,7 @@ func newExtensionRouter(e *gin.RouterGroup, l logger.Interface, ext usecase.Exte
 // @Produce      json
 // @Success      200  {object}  ExtensionResp{data=object{uid=string}}
 // @Router       /v1/ext/register [post]
-func (e *extensionRoutes) Register(c *gin.Context) {
+func (e *extensionRoutes) register(c *gin.Context) {
 	name := c.Query("name")
 	extension := c.Query("extension")
 	obj, err := e.e.Register(c.Request.Context(), name, extension)
@@ -41,6 +44,18 @@ func (e *extensionRoutes) Register(c *gin.Context) {
 	ExtResp(c, 200, 0, nil, gin.H{
 		"uid": obj.ClientUID,
 	})
+}
+
+func (e *extensionRoutes) addGroup(c *gin.Context) {
+
+}
+
+func (e *extensionRoutes) getGroup(c *gin.Context) {
+
+}
+
+func (e *extensionRoutes) removeGroup(c *gin.Context) {
+
 }
 
 func (e *extensionRoutes) Connect(c *gin.Context) {

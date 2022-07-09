@@ -25,7 +25,8 @@ type config struct {
 // hooks per client, for fast access.
 type hooks struct {
 	ExtensionClient []ent.Hook
-	TabHistory      []ent.Hook
+	Group           []ent.Hook
+	Tab             []ent.Hook
 }
 
 // Options applies the options on the config object.

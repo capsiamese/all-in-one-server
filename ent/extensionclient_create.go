@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"notification/ent/extensionclient"
-	"notification/ent/tabhistory"
+	"notification/ent/group"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -46,19 +46,19 @@ func (ecc *ExtensionClientCreate) SetLastAccessTime(t time.Time) *ExtensionClien
 	return ecc
 }
 
-// AddHistoryIDs adds the "histories" edge to the TabHistory entity by IDs.
-func (ecc *ExtensionClientCreate) AddHistoryIDs(ids ...int) *ExtensionClientCreate {
-	ecc.mutation.AddHistoryIDs(ids...)
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (ecc *ExtensionClientCreate) AddGroupIDs(ids ...int) *ExtensionClientCreate {
+	ecc.mutation.AddGroupIDs(ids...)
 	return ecc
 }
 
-// AddHistories adds the "histories" edges to the TabHistory entity.
-func (ecc *ExtensionClientCreate) AddHistories(t ...*TabHistory) *ExtensionClientCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddGroups adds the "groups" edges to the Group entity.
+func (ecc *ExtensionClientCreate) AddGroups(g ...*Group) *ExtensionClientCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
 	}
-	return ecc.AddHistoryIDs(ids...)
+	return ecc.AddGroupIDs(ids...)
 }
 
 // Mutation returns the ExtensionClientMutation object of the builder.
@@ -212,17 +212,17 @@ func (ecc *ExtensionClientCreate) createSpec() (*ExtensionClient, *sqlgraph.Crea
 		})
 		_node.LastAccessTime = value
 	}
-	if nodes := ecc.mutation.HistoriesIDs(); len(nodes) > 0 {
+	if nodes := ecc.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   extensionclient.HistoriesTable,
-			Columns: []string{extensionclient.HistoriesColumn},
+			Table:   extensionclient.GroupsTable,
+			Columns: []string{extensionclient.GroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: tabhistory.FieldID,
+					Column: group.FieldID,
 				},
 			},
 		}
