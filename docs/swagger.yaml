@@ -9,6 +9,91 @@ definitions:
       error:
         type: string
     type: object
+  ent.ExtensionClient:
+    properties:
+      client_uid:
+        description: ClientUID holds the value of the "client_uid" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.ExtensionClientEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the ExtensionClientQuery when eager-loading is set.
+      extension_id:
+        description: ExtensionID holds the value of the "extension_id" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
+      last_access_time:
+        description: LastAccessTime holds the value of the "last_access_time" field.
+        type: string
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+    type: object
+  ent.ExtensionClientEdges:
+    properties:
+      groups:
+        description: Groups holds the value of the groups edge.
+        items:
+          $ref: '#/definitions/ent.Group'
+        type: array
+    type: object
+  ent.Group:
+    properties:
+      created_at:
+        description: CreatedAt holds the value of the "created_at" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.GroupEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the GroupQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      option:
+        $ref: '#/definitions/entity.GroupOption'
+        description: Option holds the value of the "option" field.
+      share_url:
+        description: ShareURL holds the value of the "share_url" field.
+        type: string
+      uid:
+        description: UID holds the value of the "uid" field.
+        type: string
+    type: object
+  ent.GroupEdges:
+    properties:
+      tabs:
+        description: Tabs holds the value of the tabs edge.
+        items:
+          $ref: '#/definitions/ent.Tab'
+        type: array
+    type: object
+  ent.Tab:
+    properties:
+      favicon:
+        description: Favicon holds the value of the "favicon" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: integer
+      name:
+        description: Name holds the value of the "name" field.
+        type: string
+      seq:
+        description: |-
+          Seq holds the value of the "seq" field.
+          sequence
+        type: integer
+      url:
+        description: URL holds the value of the "url" field.
+        type: string
+    type: object
   entity.GroupInfo:
     properties:
       name:
@@ -51,6 +136,30 @@ info:
   version: "1.0"
 paths:
   /ext/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: get client's all groups and tabs
+      parameters:
+      - description: client uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/ExtensionResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/ent.ExtensionClient'
+              type: object
+      tags:
+      - pull
     post:
       consumes:
       - application/json
@@ -75,12 +184,7 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/ExtensionResponse'
-            - properties:
-                data:
-                  type: object
-              type: object
+            $ref: '#/definitions/ExtensionResponse'
       tags:
       - add
   /ext/register:

@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
-	"notification/ent"
+	"notification/internal/entity"
 	"notification/internal/usecase"
 	"notification/pkg/logger"
 )
@@ -19,7 +19,8 @@ func newExtensionRouter(e *gin.RouterGroup, l logger.Interface, ext usecase.Exte
 	{
 		g.POST("/register", r.register)
 		//g.Any("/connect", r.Connect)
-		g.GET("/:uid/:group", r.getGroup)
+		//g.GET("/:uid/:group", r.pull)
+		g.GET("/:uid", r.pull)
 		g.POST("/:uid", r.addGroup)
 		g.DELETE("/:uid/:group", r.removeGroup)
 	}
@@ -51,27 +52,55 @@ func (e *extensionRoutes) register(c *gin.Context) {
 // @Summery      store client tab group
 // @Description  store one or more tab group
 // @Tags         add
-// @Param        uid     path  string              true  "client uid"
+// @Param        uid  path  string  true  "client uid"
 // @Param        groups  body  []entity.GroupInfo  true  "groups"
 // @Accept       json
 // @Produce      json
-// @Response     200  {object}  ExtensionResp{data=object{}}
+// @Response     200  {object}  ExtensionResp{}
 // @Router       /ext/{uid} [post]
 func (e *extensionRoutes) addGroup(c *gin.Context) {
-	uid := c.Param("uid")
-	groups := make([]*ent.Group, 0)
+	id := c.Param("uid")
+	groups := make([]*entity.GroupInfo, 0)
 	err := c.ShouldBindJSON(&groups)
 	if err != nil {
-		e.l.Errorln(err)
+		ExtResp(c, 200, 1, err, nil)
+		return
 	}
-	err = e.e.Add(c.Request.Context(), uid)
+	uid, err := uuid.FromString(id)
 	if err != nil {
-		e.l.Errorln(err)
+		ExtResp(c, 200, 1, err, nil)
+		return
 	}
+	err = e.e.Add(c.Request.Context(), uid, groups...)
+	if err != nil {
+		ExtResp(c, 200, 1, err, nil)
+		return
+	}
+	ExtResp(c, 200, 0, nil, nil)
 }
 
-func (e *extensionRoutes) getGroup(c *gin.Context) {
-
+// pull godoc
+// @Summery      pull all tab
+// @Description  get client's all groups and tabs
+// @Tags         pull
+// @Param        uid     path  string              true  "client uid"
+// @Accept       json
+// @Produce      json
+// @Response     200  {object}  ExtensionResp{data=ent.ExtensionClient}
+// @Router       /ext/{uid} [get]
+func (e *extensionRoutes) pull(c *gin.Context) {
+	id := c.Param("uid")
+	uid, err := uuid.FromString(id)
+	if err != nil {
+		ExtResp(c, 200, 1, err, nil)
+		return
+	}
+	cli, err := e.e.Pull(c.Request.Context(), uid)
+	if err != nil {
+		ExtResp(c, 200, 1, err, nil)
+		return
+	}
+	ExtResp(c, 200, 0, nil, cli)
 }
 
 func (e *extensionRoutes) removeGroup(c *gin.Context) {

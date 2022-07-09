@@ -90,19 +90,19 @@ func (m *MockBarkRepo) EXPECT() *MockBarkRepoMockRecorder {
 	return m.recorder
 }
 
-// Get mocks base method.
+// Pull mocks base method.
 func (m *MockBarkRepo) Get(arg0 context.Context, arg1 *entity.BarkDevice) (*entity.BarkDevice, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1)
+	ret := m.ctrl.Call(m, "Pull", arg0, arg1)
 	ret0, _ := ret[0].(*entity.BarkDevice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Get indicates an expected call of Get.
+// Pull indicates an expected call of Pull.
 func (mr *MockBarkRepoMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBarkRepo)(nil).Get), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pull", reflect.TypeOf((*MockBarkRepo)(nil).Get), arg0, arg1)
 }
 
 // Store mocks base method.

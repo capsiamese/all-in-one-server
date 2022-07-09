@@ -31,7 +31,10 @@ func (ExtensionClient) Edges() []ent.Edge {
 }
 
 func (ExtensionClient) Annotations() []schema.Annotation {
-	return []schema.Annotation{
-		edge.Annotation{StructTag: `swaggerignore:"true"`},
-	}
+	return nil
+	/*
+		return []schema.Annotation{
+			edge.Annotation{StructTag: `swaggerignore:"true"`},
+		}
+	*/
 }
