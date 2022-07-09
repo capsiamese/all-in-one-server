@@ -34,9 +34,9 @@ func pdResp(c *gin.Context, state, code int, err error, content interface{}) {
 
 type ExtensionResp struct {
 	Code int   `json:"code"`
-	Err  error `json:"error,omitempty"`
+	Err  error `json:"error,omitempty" swaggertype:"string"`
 	Data any   `json:"data,omitempty"`
-}
+} //@name ExtensionResponse
 
 func ExtResp(c *gin.Context, state, code int, err error, data any) {
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"notification/ent/extensionclient"
 	"notification/ent/predicate"
+	"notification/ent/tabhistory"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -54,9 +55,45 @@ func (ecu *ExtensionClientUpdate) SetLastAccessTime(t time.Time) *ExtensionClien
 	return ecu
 }
 
+// AddHistoryIDs adds the "histories" edge to the TabHistory entity by IDs.
+func (ecu *ExtensionClientUpdate) AddHistoryIDs(ids ...int) *ExtensionClientUpdate {
+	ecu.mutation.AddHistoryIDs(ids...)
+	return ecu
+}
+
+// AddHistories adds the "histories" edges to the TabHistory entity.
+func (ecu *ExtensionClientUpdate) AddHistories(t ...*TabHistory) *ExtensionClientUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return ecu.AddHistoryIDs(ids...)
+}
+
 // Mutation returns the ExtensionClientMutation object of the builder.
 func (ecu *ExtensionClientUpdate) Mutation() *ExtensionClientMutation {
 	return ecu.mutation
+}
+
+// ClearHistories clears all "histories" edges to the TabHistory entity.
+func (ecu *ExtensionClientUpdate) ClearHistories() *ExtensionClientUpdate {
+	ecu.mutation.ClearHistories()
+	return ecu
+}
+
+// RemoveHistoryIDs removes the "histories" edge to TabHistory entities by IDs.
+func (ecu *ExtensionClientUpdate) RemoveHistoryIDs(ids ...int) *ExtensionClientUpdate {
+	ecu.mutation.RemoveHistoryIDs(ids...)
+	return ecu
+}
+
+// RemoveHistories removes "histories" edges to TabHistory entities.
+func (ecu *ExtensionClientUpdate) RemoveHistories(t ...*TabHistory) *ExtensionClientUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return ecu.RemoveHistoryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -66,12 +103,18 @@ func (ecu *ExtensionClientUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(ecu.hooks) == 0 {
+		if err = ecu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = ecu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ExtensionClientMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ecu.check(); err != nil {
+				return 0, err
 			}
 			ecu.mutation = mutation
 			affected, err = ecu.sqlSave(ctx)
@@ -111,6 +154,21 @@ func (ecu *ExtensionClientUpdate) ExecX(ctx context.Context) {
 	if err := ecu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ecu *ExtensionClientUpdate) check() error {
+	if v, ok := ecu.mutation.Name(); ok {
+		if err := extensionclient.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "ExtensionClient.name": %w`, err)}
+		}
+	}
+	if v, ok := ecu.mutation.ExtensionID(); ok {
+		if err := extensionclient.ExtensionIDValidator(v); err != nil {
+			return &ValidationError{Name: "extension_id", err: fmt.Errorf(`ent: validator failed for field "ExtensionClient.extension_id": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (ecu *ExtensionClientUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -159,6 +217,60 @@ func (ecu *ExtensionClientUpdate) sqlSave(ctx context.Context) (n int, err error
 			Column: extensionclient.FieldLastAccessTime,
 		})
 	}
+	if ecu.mutation.HistoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   extensionclient.HistoriesTable,
+			Columns: []string{extensionclient.HistoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tabhistory.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecu.mutation.RemovedHistoriesIDs(); len(nodes) > 0 && !ecu.mutation.HistoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   extensionclient.HistoriesTable,
+			Columns: []string{extensionclient.HistoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tabhistory.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecu.mutation.HistoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   extensionclient.HistoriesTable,
+			Columns: []string{extensionclient.HistoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tabhistory.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ecu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{extensionclient.Label}
@@ -202,9 +314,45 @@ func (ecuo *ExtensionClientUpdateOne) SetLastAccessTime(t time.Time) *ExtensionC
 	return ecuo
 }
 
+// AddHistoryIDs adds the "histories" edge to the TabHistory entity by IDs.
+func (ecuo *ExtensionClientUpdateOne) AddHistoryIDs(ids ...int) *ExtensionClientUpdateOne {
+	ecuo.mutation.AddHistoryIDs(ids...)
+	return ecuo
+}
+
+// AddHistories adds the "histories" edges to the TabHistory entity.
+func (ecuo *ExtensionClientUpdateOne) AddHistories(t ...*TabHistory) *ExtensionClientUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return ecuo.AddHistoryIDs(ids...)
+}
+
 // Mutation returns the ExtensionClientMutation object of the builder.
 func (ecuo *ExtensionClientUpdateOne) Mutation() *ExtensionClientMutation {
 	return ecuo.mutation
+}
+
+// ClearHistories clears all "histories" edges to the TabHistory entity.
+func (ecuo *ExtensionClientUpdateOne) ClearHistories() *ExtensionClientUpdateOne {
+	ecuo.mutation.ClearHistories()
+	return ecuo
+}
+
+// RemoveHistoryIDs removes the "histories" edge to TabHistory entities by IDs.
+func (ecuo *ExtensionClientUpdateOne) RemoveHistoryIDs(ids ...int) *ExtensionClientUpdateOne {
+	ecuo.mutation.RemoveHistoryIDs(ids...)
+	return ecuo
+}
+
+// RemoveHistories removes "histories" edges to TabHistory entities.
+func (ecuo *ExtensionClientUpdateOne) RemoveHistories(t ...*TabHistory) *ExtensionClientUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return ecuo.RemoveHistoryIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -221,12 +369,18 @@ func (ecuo *ExtensionClientUpdateOne) Save(ctx context.Context) (*ExtensionClien
 		node *ExtensionClient
 	)
 	if len(ecuo.hooks) == 0 {
+		if err = ecuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = ecuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ExtensionClientMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ecuo.check(); err != nil {
+				return nil, err
 			}
 			ecuo.mutation = mutation
 			node, err = ecuo.sqlSave(ctx)
@@ -266,6 +420,21 @@ func (ecuo *ExtensionClientUpdateOne) ExecX(ctx context.Context) {
 	if err := ecuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ecuo *ExtensionClientUpdateOne) check() error {
+	if v, ok := ecuo.mutation.Name(); ok {
+		if err := extensionclient.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "ExtensionClient.name": %w`, err)}
+		}
+	}
+	if v, ok := ecuo.mutation.ExtensionID(); ok {
+		if err := extensionclient.ExtensionIDValidator(v); err != nil {
+			return &ValidationError{Name: "extension_id", err: fmt.Errorf(`ent: validator failed for field "ExtensionClient.extension_id": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (ecuo *ExtensionClientUpdateOne) sqlSave(ctx context.Context) (_node *ExtensionClient, err error) {
@@ -330,6 +499,60 @@ func (ecuo *ExtensionClientUpdateOne) sqlSave(ctx context.Context) (_node *Exten
 			Value:  value,
 			Column: extensionclient.FieldLastAccessTime,
 		})
+	}
+	if ecuo.mutation.HistoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   extensionclient.HistoriesTable,
+			Columns: []string{extensionclient.HistoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tabhistory.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecuo.mutation.RemovedHistoriesIDs(); len(nodes) > 0 && !ecuo.mutation.HistoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   extensionclient.HistoriesTable,
+			Columns: []string{extensionclient.HistoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tabhistory.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecuo.mutation.HistoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   extensionclient.HistoriesTable,
+			Columns: []string{extensionclient.HistoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tabhistory.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &ExtensionClient{config: ecuo.config}
 	_spec.Assign = _node.assignValues

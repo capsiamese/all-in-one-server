@@ -72,7 +72,7 @@ func Run(cfg *config.Config) error {
 	// **** service
 	barkUseCase := usecase.NewBark(bark.New(pg, l), barkApns)
 	pushDeerUseCase := usecase.NewPushDeer(pushdeer.New(pg, l), pdApns)
-	extensionUseCase := usecase.NewExtension(entCli)
+	extensionUseCase := usecase.NewExtension(entCli, l)
 	// **** service
 
 	e := gin.New()

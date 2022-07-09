@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	uuid "github.com/satori/go.uuid"
 )
@@ -23,5 +24,7 @@ func (ExtensionClient) Fields() []ent.Field {
 
 // Edges of the ExtensionClient.
 func (ExtensionClient) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("histories", TabHistory.Type),
+	}
 }

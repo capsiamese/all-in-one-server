@@ -26,6 +26,27 @@ type ExtensionClient struct {
 	ClientUID uuid.UUID `json:"client_uid,omitempty"`
 	// LastAccessTime holds the value of the "last_access_time" field.
 	LastAccessTime time.Time `json:"last_access_time,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ExtensionClientQuery when eager-loading is set.
+	Edges ExtensionClientEdges `json:"edges"`
+}
+
+// ExtensionClientEdges holds the relations/edges for other nodes in the graph.
+type ExtensionClientEdges struct {
+	// Histories holds the value of the histories edge.
+	Histories []*TabHistory `json:"histories,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// HistoriesOrErr returns the Histories value or an error if the edge
+// was not loaded in eager-loading.
+func (e ExtensionClientEdges) HistoriesOrErr() ([]*TabHistory, error) {
+	if e.loadedTypes[0] {
+		return e.Histories, nil
+	}
+	return nil, &NotLoadedError{edge: "histories"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -89,6 +110,11 @@ func (ec *ExtensionClient) assignValues(columns []string, values []interface{}) 
 		}
 	}
 	return nil
+}
+
+// QueryHistories queries the "histories" edge of the ExtensionClient entity.
+func (ec *ExtensionClient) QueryHistories() *TabHistoryQuery {
+	return (&ExtensionClientClient{config: ec.config}).QueryHistories(ec)
 }
 
 // Update returns a builder for updating this ExtensionClient.

@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// ExtensionClient is the client for interacting with the ExtensionClient builders.
 	ExtensionClient *ExtensionClientClient
+	// TabHistory is the client for interacting with the TabHistory builders.
+	TabHistory *TabHistoryClient
 
 	// lazily loaded.
 	client     *Client
@@ -150,6 +152,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.ExtensionClient = NewExtensionClientClient(tx.config)
+	tx.TabHistory = NewTabHistoryClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

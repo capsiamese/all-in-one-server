@@ -1,0 +1,51 @@
+definitions:
+  ExtensionResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        type: any
+      error:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /v1/ext/register:
+    post:
+      description: get uid
+      parameters:
+      - description: client name
+        in: query
+        maxLength: 64
+        minLength: 1
+        name: name
+        required: true
+        type: string
+      - description: extension id
+        in: query
+        maxLength: 256
+        minLength: 1
+        name: extension
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/ExtensionResponse'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      uid:
+                        type: string
+                    type: object
+              type: object
+      tags:
+      - extension
+swagger: "2.0"

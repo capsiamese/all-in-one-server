@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"notification/ent/extensionclient"
 	"notification/ent/predicate"
+	"notification/ent/tabhistory"
 	"sync"
 	"time"
 
@@ -25,6 +26,7 @@ const (
 
 	// Node types.
 	TypeExtensionClient = "ExtensionClient"
+	TypeTabHistory      = "TabHistory"
 )
 
 // ExtensionClientMutation represents an operation that mutates the ExtensionClient nodes in the graph.
@@ -38,6 +40,9 @@ type ExtensionClientMutation struct {
 	client_uid       *uuid.UUID
 	last_access_time *time.Time
 	clearedFields    map[string]struct{}
+	histories        map[int]struct{}
+	removedhistories map[int]struct{}
+	clearedhistories bool
 	done             bool
 	oldValue         func(context.Context) (*ExtensionClient, error)
 	predicates       []predicate.ExtensionClient
@@ -285,6 +290,60 @@ func (m *ExtensionClientMutation) ResetLastAccessTime() {
 	m.last_access_time = nil
 }
 
+// AddHistoryIDs adds the "histories" edge to the TabHistory entity by ids.
+func (m *ExtensionClientMutation) AddHistoryIDs(ids ...int) {
+	if m.histories == nil {
+		m.histories = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.histories[ids[i]] = struct{}{}
+	}
+}
+
+// ClearHistories clears the "histories" edge to the TabHistory entity.
+func (m *ExtensionClientMutation) ClearHistories() {
+	m.clearedhistories = true
+}
+
+// HistoriesCleared reports if the "histories" edge to the TabHistory entity was cleared.
+func (m *ExtensionClientMutation) HistoriesCleared() bool {
+	return m.clearedhistories
+}
+
+// RemoveHistoryIDs removes the "histories" edge to the TabHistory entity by IDs.
+func (m *ExtensionClientMutation) RemoveHistoryIDs(ids ...int) {
+	if m.removedhistories == nil {
+		m.removedhistories = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.histories, ids[i])
+		m.removedhistories[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedHistories returns the removed IDs of the "histories" edge to the TabHistory entity.
+func (m *ExtensionClientMutation) RemovedHistoriesIDs() (ids []int) {
+	for id := range m.removedhistories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// HistoriesIDs returns the "histories" edge IDs in the mutation.
+func (m *ExtensionClientMutation) HistoriesIDs() (ids []int) {
+	for id := range m.histories {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetHistories resets all changes to the "histories" edge.
+func (m *ExtensionClientMutation) ResetHistories() {
+	m.histories = nil
+	m.clearedhistories = false
+	m.removedhistories = nil
+}
+
 // Where appends a list predicates to the ExtensionClientMutation builder.
 func (m *ExtensionClientMutation) Where(ps ...predicate.ExtensionClient) {
 	m.predicates = append(m.predicates, ps...)
@@ -454,48 +513,613 @@ func (m *ExtensionClientMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ExtensionClientMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.histories != nil {
+		edges = append(edges, extensionclient.EdgeHistories)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ExtensionClientMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case extensionclient.EdgeHistories:
+		ids := make([]ent.Value, 0, len(m.histories))
+		for id := range m.histories {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ExtensionClientMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedhistories != nil {
+		edges = append(edges, extensionclient.EdgeHistories)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ExtensionClientMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case extensionclient.EdgeHistories:
+		ids := make([]ent.Value, 0, len(m.removedhistories))
+		for id := range m.removedhistories {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ExtensionClientMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedhistories {
+		edges = append(edges, extensionclient.EdgeHistories)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ExtensionClientMutation) EdgeCleared(name string) bool {
+	switch name {
+	case extensionclient.EdgeHistories:
+		return m.clearedhistories
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ExtensionClientMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown ExtensionClient unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ExtensionClientMutation) ResetEdge(name string) error {
+	switch name {
+	case extensionclient.EdgeHistories:
+		m.ResetHistories()
+		return nil
+	}
 	return fmt.Errorf("unknown ExtensionClient edge %s", name)
+}
+
+// TabHistoryMutation represents an operation that mutates the TabHistory nodes in the graph.
+type TabHistoryMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	url                 *string
+	name                *string
+	icon                *string
+	clearedFields       map[string]struct{}
+	history_list        *int
+	clearedhistory_list bool
+	done                bool
+	oldValue            func(context.Context) (*TabHistory, error)
+	predicates          []predicate.TabHistory
+}
+
+var _ ent.Mutation = (*TabHistoryMutation)(nil)
+
+// tabhistoryOption allows management of the mutation configuration using functional options.
+type tabhistoryOption func(*TabHistoryMutation)
+
+// newTabHistoryMutation creates new mutation for the TabHistory entity.
+func newTabHistoryMutation(c config, op Op, opts ...tabhistoryOption) *TabHistoryMutation {
+	m := &TabHistoryMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTabHistory,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTabHistoryID sets the ID field of the mutation.
+func withTabHistoryID(id int) tabhistoryOption {
+	return func(m *TabHistoryMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TabHistory
+		)
+		m.oldValue = func(ctx context.Context) (*TabHistory, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TabHistory.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTabHistory sets the old TabHistory of the mutation.
+func withTabHistory(node *TabHistory) tabhistoryOption {
+	return func(m *TabHistoryMutation) {
+		m.oldValue = func(context.Context) (*TabHistory, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TabHistoryMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TabHistoryMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TabHistoryMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TabHistoryMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TabHistory.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetURL sets the "url" field.
+func (m *TabHistoryMutation) SetURL(s string) {
+	m.url = &s
+}
+
+// URL returns the value of the "url" field in the mutation.
+func (m *TabHistoryMutation) URL() (r string, exists bool) {
+	v := m.url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURL returns the old "url" field's value of the TabHistory entity.
+// If the TabHistory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TabHistoryMutation) OldURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+	}
+	return oldValue.URL, nil
+}
+
+// ResetURL resets all changes to the "url" field.
+func (m *TabHistoryMutation) ResetURL() {
+	m.url = nil
+}
+
+// SetName sets the "name" field.
+func (m *TabHistoryMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TabHistoryMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the TabHistory entity.
+// If the TabHistory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TabHistoryMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *TabHistoryMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[tabhistory.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *TabHistoryMutation) NameCleared() bool {
+	_, ok := m.clearedFields[tabhistory.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TabHistoryMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, tabhistory.FieldName)
+}
+
+// SetIcon sets the "icon" field.
+func (m *TabHistoryMutation) SetIcon(s string) {
+	m.icon = &s
+}
+
+// Icon returns the value of the "icon" field in the mutation.
+func (m *TabHistoryMutation) Icon() (r string, exists bool) {
+	v := m.icon
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIcon returns the old "icon" field's value of the TabHistory entity.
+// If the TabHistory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TabHistoryMutation) OldIcon(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIcon is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIcon requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIcon: %w", err)
+	}
+	return oldValue.Icon, nil
+}
+
+// ClearIcon clears the value of the "icon" field.
+func (m *TabHistoryMutation) ClearIcon() {
+	m.icon = nil
+	m.clearedFields[tabhistory.FieldIcon] = struct{}{}
+}
+
+// IconCleared returns if the "icon" field was cleared in this mutation.
+func (m *TabHistoryMutation) IconCleared() bool {
+	_, ok := m.clearedFields[tabhistory.FieldIcon]
+	return ok
+}
+
+// ResetIcon resets all changes to the "icon" field.
+func (m *TabHistoryMutation) ResetIcon() {
+	m.icon = nil
+	delete(m.clearedFields, tabhistory.FieldIcon)
+}
+
+// SetHistoryListID sets the "history_list" edge to the ExtensionClient entity by id.
+func (m *TabHistoryMutation) SetHistoryListID(id int) {
+	m.history_list = &id
+}
+
+// ClearHistoryList clears the "history_list" edge to the ExtensionClient entity.
+func (m *TabHistoryMutation) ClearHistoryList() {
+	m.clearedhistory_list = true
+}
+
+// HistoryListCleared reports if the "history_list" edge to the ExtensionClient entity was cleared.
+func (m *TabHistoryMutation) HistoryListCleared() bool {
+	return m.clearedhistory_list
+}
+
+// HistoryListID returns the "history_list" edge ID in the mutation.
+func (m *TabHistoryMutation) HistoryListID() (id int, exists bool) {
+	if m.history_list != nil {
+		return *m.history_list, true
+	}
+	return
+}
+
+// HistoryListIDs returns the "history_list" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// HistoryListID instead. It exists only for internal usage by the builders.
+func (m *TabHistoryMutation) HistoryListIDs() (ids []int) {
+	if id := m.history_list; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetHistoryList resets all changes to the "history_list" edge.
+func (m *TabHistoryMutation) ResetHistoryList() {
+	m.history_list = nil
+	m.clearedhistory_list = false
+}
+
+// Where appends a list predicates to the TabHistoryMutation builder.
+func (m *TabHistoryMutation) Where(ps ...predicate.TabHistory) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *TabHistoryMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (TabHistory).
+func (m *TabHistoryMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TabHistoryMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.url != nil {
+		fields = append(fields, tabhistory.FieldURL)
+	}
+	if m.name != nil {
+		fields = append(fields, tabhistory.FieldName)
+	}
+	if m.icon != nil {
+		fields = append(fields, tabhistory.FieldIcon)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TabHistoryMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tabhistory.FieldURL:
+		return m.URL()
+	case tabhistory.FieldName:
+		return m.Name()
+	case tabhistory.FieldIcon:
+		return m.Icon()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TabHistoryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tabhistory.FieldURL:
+		return m.OldURL(ctx)
+	case tabhistory.FieldName:
+		return m.OldName(ctx)
+	case tabhistory.FieldIcon:
+		return m.OldIcon(ctx)
+	}
+	return nil, fmt.Errorf("unknown TabHistory field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TabHistoryMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tabhistory.FieldURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURL(v)
+		return nil
+	case tabhistory.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case tabhistory.FieldIcon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIcon(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TabHistory field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TabHistoryMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TabHistoryMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TabHistoryMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown TabHistory numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TabHistoryMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tabhistory.FieldName) {
+		fields = append(fields, tabhistory.FieldName)
+	}
+	if m.FieldCleared(tabhistory.FieldIcon) {
+		fields = append(fields, tabhistory.FieldIcon)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TabHistoryMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TabHistoryMutation) ClearField(name string) error {
+	switch name {
+	case tabhistory.FieldName:
+		m.ClearName()
+		return nil
+	case tabhistory.FieldIcon:
+		m.ClearIcon()
+		return nil
+	}
+	return fmt.Errorf("unknown TabHistory nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TabHistoryMutation) ResetField(name string) error {
+	switch name {
+	case tabhistory.FieldURL:
+		m.ResetURL()
+		return nil
+	case tabhistory.FieldName:
+		m.ResetName()
+		return nil
+	case tabhistory.FieldIcon:
+		m.ResetIcon()
+		return nil
+	}
+	return fmt.Errorf("unknown TabHistory field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TabHistoryMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.history_list != nil {
+		edges = append(edges, tabhistory.EdgeHistoryList)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TabHistoryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tabhistory.EdgeHistoryList:
+		if id := m.history_list; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TabHistoryMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TabHistoryMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TabHistoryMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedhistory_list {
+		edges = append(edges, tabhistory.EdgeHistoryList)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TabHistoryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tabhistory.EdgeHistoryList:
+		return m.clearedhistory_list
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TabHistoryMutation) ClearEdge(name string) error {
+	switch name {
+	case tabhistory.EdgeHistoryList:
+		m.ClearHistoryList()
+		return nil
+	}
+	return fmt.Errorf("unknown TabHistory unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TabHistoryMutation) ResetEdge(name string) error {
+	switch name {
+	case tabhistory.EdgeHistoryList:
+		m.ResetHistoryList()
+		return nil
+	}
+	return fmt.Errorf("unknown TabHistory edge %s", name)
 }

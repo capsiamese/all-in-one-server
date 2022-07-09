@@ -4,11 +4,13 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
 	"notification/ent/extensionclient"
 	"notification/ent/predicate"
+	"notification/ent/tabhistory"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,6 +26,8 @@ type ExtensionClientQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.ExtensionClient
+	// eager-loading edges.
+	withHistories *TabHistoryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -58,6 +62,28 @@ func (ecq *ExtensionClientQuery) Unique(unique bool) *ExtensionClientQuery {
 func (ecq *ExtensionClientQuery) Order(o ...OrderFunc) *ExtensionClientQuery {
 	ecq.order = append(ecq.order, o...)
 	return ecq
+}
+
+// QueryHistories chains the current query on the "histories" edge.
+func (ecq *ExtensionClientQuery) QueryHistories() *TabHistoryQuery {
+	query := &TabHistoryQuery{config: ecq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ecq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ecq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(extensionclient.Table, extensionclient.FieldID, selector),
+			sqlgraph.To(tabhistory.Table, tabhistory.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, extensionclient.HistoriesTable, extensionclient.HistoriesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ecq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first ExtensionClient entity from the query.
@@ -236,16 +262,28 @@ func (ecq *ExtensionClientQuery) Clone() *ExtensionClientQuery {
 		return nil
 	}
 	return &ExtensionClientQuery{
-		config:     ecq.config,
-		limit:      ecq.limit,
-		offset:     ecq.offset,
-		order:      append([]OrderFunc{}, ecq.order...),
-		predicates: append([]predicate.ExtensionClient{}, ecq.predicates...),
+		config:        ecq.config,
+		limit:         ecq.limit,
+		offset:        ecq.offset,
+		order:         append([]OrderFunc{}, ecq.order...),
+		predicates:    append([]predicate.ExtensionClient{}, ecq.predicates...),
+		withHistories: ecq.withHistories.Clone(),
 		// clone intermediate query.
 		sql:    ecq.sql.Clone(),
 		path:   ecq.path,
 		unique: ecq.unique,
 	}
+}
+
+// WithHistories tells the query-builder to eager-load the nodes that are connected to
+// the "histories" edge. The optional arguments are used to configure the query builder of the edge.
+func (ecq *ExtensionClientQuery) WithHistories(opts ...func(*TabHistoryQuery)) *ExtensionClientQuery {
+	query := &TabHistoryQuery{config: ecq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	ecq.withHistories = query
+	return ecq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -311,8 +349,11 @@ func (ecq *ExtensionClientQuery) prepareQuery(ctx context.Context) error {
 
 func (ecq *ExtensionClientQuery) sqlAll(ctx context.Context) ([]*ExtensionClient, error) {
 	var (
-		nodes = []*ExtensionClient{}
-		_spec = ecq.querySpec()
+		nodes       = []*ExtensionClient{}
+		_spec       = ecq.querySpec()
+		loadedTypes = [1]bool{
+			ecq.withHistories != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &ExtensionClient{config: ecq.config}
@@ -324,6 +365,7 @@ func (ecq *ExtensionClientQuery) sqlAll(ctx context.Context) ([]*ExtensionClient
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ecq.driver, _spec); err != nil {
@@ -332,6 +374,36 @@ func (ecq *ExtensionClientQuery) sqlAll(ctx context.Context) ([]*ExtensionClient
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := ecq.withHistories; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*ExtensionClient)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Histories = []*TabHistory{}
+		}
+		query.withFKs = true
+		query.Where(predicate.TabHistory(func(s *sql.Selector) {
+			s.Where(sql.InValues(extensionclient.HistoriesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.extension_client_histories
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "extension_client_histories" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "extension_client_histories" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Histories = append(node.Edges.Histories, n)
+		}
+	}
+
 	return nodes, nil
 }
 

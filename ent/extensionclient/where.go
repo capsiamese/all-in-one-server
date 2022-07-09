@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -492,6 +493,34 @@ func LastAccessTimeLT(v time.Time) predicate.ExtensionClient {
 func LastAccessTimeLTE(v time.Time) predicate.ExtensionClient {
 	return predicate.ExtensionClient(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldLastAccessTime), v))
+	})
+}
+
+// HasHistories applies the HasEdge predicate on the "histories" edge.
+func HasHistories() predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(HistoriesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, HistoriesTable, HistoriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasHistoriesWith applies the HasEdge predicate on the "histories" edge with a given conditions (other predicates).
+func HasHistoriesWith(preds ...predicate.TabHistory) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(HistoriesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, HistoriesTable, HistoriesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

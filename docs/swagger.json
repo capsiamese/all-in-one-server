@@ -1,0 +1,87 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/v1/ext/register": {
+            "post": {
+                "description": "get uid",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "extension"
+                ],
+                "parameters": [
+                    {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "client name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maxLength": 256,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "extension id",
+                        "name": "extension",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ExtensionResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "uid": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ExtensionResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "any"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

@@ -21,6 +21,15 @@ func newExtensionRouter(e *gin.RouterGroup, l logger.Interface, ext usecase.Exte
 	}
 }
 
+// Register godoc
+// @Summery      Register extension client
+// @Description  get uid
+// @Tags         extension
+// @Param        name       query  string  true  "client name"   minlength(1)  maxlength(64)
+// @Param        extension  query  string  true  "extension id"  minlength(1)  maxlength(256)
+// @Produce      json
+// @Success      200  {object}  ExtensionResp{data=object{uid=string}}
+// @Router       /v1/ext/register [post]
 func (e *extensionRoutes) Register(c *gin.Context) {
 	name := c.Query("name")
 	extension := c.Query("extension")

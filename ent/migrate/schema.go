@@ -22,11 +22,35 @@ var (
 		Columns:    ExtensionClientsColumns,
 		PrimaryKey: []*schema.Column{ExtensionClientsColumns[0]},
 	}
+	// TabHistoriesColumns holds the columns for the "tab_histories" table.
+	TabHistoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "url", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "icon", Type: field.TypeString, Nullable: true},
+		{Name: "extension_client_histories", Type: field.TypeInt, Nullable: true},
+	}
+	// TabHistoriesTable holds the schema information for the "tab_histories" table.
+	TabHistoriesTable = &schema.Table{
+		Name:       "tab_histories",
+		Columns:    TabHistoriesColumns,
+		PrimaryKey: []*schema.Column{TabHistoriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tab_histories_extension_clients_histories",
+				Columns:    []*schema.Column{TabHistoriesColumns[4]},
+				RefColumns: []*schema.Column{ExtensionClientsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ExtensionClientsTable,
+		TabHistoriesTable,
 	}
 )
 
 func init() {
+	TabHistoriesTable.ForeignKeys[0].RefTable = ExtensionClientsTable
 }

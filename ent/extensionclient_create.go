@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"notification/ent/extensionclient"
+	"notification/ent/tabhistory"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -43,6 +44,21 @@ func (ecc *ExtensionClientCreate) SetClientUID(u uuid.UUID) *ExtensionClientCrea
 func (ecc *ExtensionClientCreate) SetLastAccessTime(t time.Time) *ExtensionClientCreate {
 	ecc.mutation.SetLastAccessTime(t)
 	return ecc
+}
+
+// AddHistoryIDs adds the "histories" edge to the TabHistory entity by IDs.
+func (ecc *ExtensionClientCreate) AddHistoryIDs(ids ...int) *ExtensionClientCreate {
+	ecc.mutation.AddHistoryIDs(ids...)
+	return ecc
+}
+
+// AddHistories adds the "histories" edges to the TabHistory entity.
+func (ecc *ExtensionClientCreate) AddHistories(t ...*TabHistory) *ExtensionClientCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return ecc.AddHistoryIDs(ids...)
 }
 
 // Mutation returns the ExtensionClientMutation object of the builder.
@@ -118,8 +134,18 @@ func (ecc *ExtensionClientCreate) check() error {
 	if _, ok := ecc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "ExtensionClient.name"`)}
 	}
+	if v, ok := ecc.mutation.Name(); ok {
+		if err := extensionclient.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "ExtensionClient.name": %w`, err)}
+		}
+	}
 	if _, ok := ecc.mutation.ExtensionID(); !ok {
 		return &ValidationError{Name: "extension_id", err: errors.New(`ent: missing required field "ExtensionClient.extension_id"`)}
+	}
+	if v, ok := ecc.mutation.ExtensionID(); ok {
+		if err := extensionclient.ExtensionIDValidator(v); err != nil {
+			return &ValidationError{Name: "extension_id", err: fmt.Errorf(`ent: validator failed for field "ExtensionClient.extension_id": %w`, err)}
+		}
 	}
 	if _, ok := ecc.mutation.ClientUID(); !ok {
 		return &ValidationError{Name: "client_uid", err: errors.New(`ent: missing required field "ExtensionClient.client_uid"`)}
@@ -185,6 +211,25 @@ func (ecc *ExtensionClientCreate) createSpec() (*ExtensionClient, *sqlgraph.Crea
 			Column: extensionclient.FieldLastAccessTime,
 		})
 		_node.LastAccessTime = value
+	}
+	if nodes := ecc.mutation.HistoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   extensionclient.HistoriesTable,
+			Columns: []string{extensionclient.HistoriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: tabhistory.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
