@@ -2,16 +2,7 @@
 <module type="WEB_MODULE" version="4">
   <component name="Go" enabled="true" />
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/ent/enttest" />
-      <excludeFolder url="file://$MODULE_DIR$/ent/extensionclient" />
-      <excludeFolder url="file://$MODULE_DIR$/ent/group" />
-      <excludeFolder url="file://$MODULE_DIR$/ent/hook" />
-      <excludeFolder url="file://$MODULE_DIR$/ent/migrate" />
-      <excludeFolder url="file://$MODULE_DIR$/ent/predicate" />
-      <excludeFolder url="file://$MODULE_DIR$/ent/runtime" />
-      <excludeFolder url="file://$MODULE_DIR$/ent/tab" />
-    </content>
+    <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
