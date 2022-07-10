@@ -135,7 +135,7 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /ext/{uid}:
+  /ext/{uid}/group:
     get:
       consumes:
       - application/json

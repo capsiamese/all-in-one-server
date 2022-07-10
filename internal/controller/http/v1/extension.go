@@ -16,13 +16,16 @@ type extensionRoutes struct {
 func newExtensionRouter(e *gin.RouterGroup, l logger.Interface, ext usecase.Extension) {
 	r := &extensionRoutes{e: ext, l: l}
 	g := e.Group("/ext")
+	g.POST("/register", r.register)
+	//g.Any("/connect", r.Connect)
 	{
-		g.POST("/register", r.register)
-		//g.Any("/connect", r.Connect)
-		//g.GET("/:uid/:group", r.pull)
-		g.GET("/:uid", r.pull)
-		g.POST("/:uid", r.addGroup)
-		g.DELETE("/:uid/:group", r.removeGroup)
+		client := g.Group("/:uid")
+		{
+			tabGroup := client.Group("/group")
+			tabGroup.GET("/", r.pull)
+			tabGroup.POST("/", r.addGroup)
+			tabGroup.DELETE("/:group", r.removeGroup)
+		}
 	}
 }
 
@@ -57,7 +60,7 @@ func (e *extensionRoutes) register(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Response     200  {object}  ExtensionResp{}
-// @Router       /ext/{uid} [post]
+// @Router       /ext/{uid}/group [post]
 func (e *extensionRoutes) addGroup(c *gin.Context) {
 	id := c.Param("uid")
 	groups := make([]*entity.GroupInfo, 0)
@@ -87,7 +90,7 @@ func (e *extensionRoutes) addGroup(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Response     200  {object}  ExtensionResp{data=ent.ExtensionClient}
-// @Router       /ext/{uid} [get]
+// @Router       /ext/{uid}/group [get]
 func (e *extensionRoutes) pull(c *gin.Context) {
 	id := c.Param("uid")
 	uid, err := uuid.FromString(id)

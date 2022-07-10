@@ -88,7 +88,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/ext/{uid}": {
+        "/ext/{uid}/group": {
             "get": {
                 "description": "get client's all groups and tabs",
                 "consumes": [
