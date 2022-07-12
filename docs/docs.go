@@ -157,9 +157,151 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.GroupInfo"
+                                "$ref": "#/definitions/pb.Group"
                             }
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ExtensionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ext/{uid}/swap/tab": {
+            "post": {
+                "description": "swap 2 tab",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "modify"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "client uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group(a) uid",
+                        "name": "groupA",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group(b) uid",
+                        "name": "groupB",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group(a) tab(a) uid",
+                        "name": "tabA",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group(b) tab(b) uid",
+                        "name": "tabB",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ExtensionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ext/{uid}/{group}/": {
+            "delete": {
+                "description": "remove tab group and all tabs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "remove"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "client uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group uid",
+                        "name": "group",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ExtensionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ext/{uid}/{group}/{tab}": {
+            "delete": {
+                "description": "remove tab",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "remove"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "client uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "group uid",
+                        "name": "group",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "tab uid",
+                        "name": "tab",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -250,7 +392,7 @@ const docTemplate = `{
                 },
                 "option": {
                     "description": "Option holds the value of the \"option\" field.",
-                    "$ref": "#/definitions/entity.GroupOption"
+                    "$ref": "#/definitions/pb.GroupOption"
                 },
                 "share_url": {
                     "description": "ShareURL holds the value of the \"share_url\" field.",
@@ -293,30 +435,40 @@ const docTemplate = `{
                     "description": "Seq holds the value of the \"seq\" field.\nsequence",
                     "type": "integer"
                 },
+                "uid": {
+                    "description": "UID holds the value of the \"uid\" field.",
+                    "type": "string"
+                },
                 "url": {
                     "description": "URL holds the value of the \"url\" field.",
                     "type": "string"
                 }
             }
         },
-        "entity.GroupInfo": {
+        "pb.Group": {
             "type": "object",
             "properties": {
+                "index": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
                 "option": {
-                    "$ref": "#/definitions/entity.GroupOption"
+                    "$ref": "#/definitions/pb.GroupOption"
                 },
                 "tabs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/entity.Tab"
+                        "$ref": "#/definitions/pb.Tab"
                     }
+                },
+                "uid": {
+                    "type": "string"
                 }
             }
         },
-        "entity.GroupOption": {
+        "pb.GroupOption": {
             "type": "object",
             "properties": {
                 "tags": {
@@ -327,13 +479,19 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.Tab": {
+        "pb.Tab": {
             "type": "object",
             "properties": {
                 "favicon": {
                     "type": "string"
                 },
+                "index": {
+                    "type": "integer"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "uid": {
                     "type": "string"
                 },
                 "url": {

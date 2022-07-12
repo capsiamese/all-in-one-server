@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // TabUpdate is the builder for updating Tab entities.
@@ -70,6 +72,12 @@ func (tu *TabUpdate) SetNillableFavicon(s *string) *TabUpdate {
 // ClearFavicon clears the value of the "favicon" field.
 func (tu *TabUpdate) ClearFavicon() *TabUpdate {
 	tu.mutation.ClearFavicon()
+	return tu
+}
+
+// SetUID sets the "uid" field.
+func (tu *TabUpdate) SetUID(u uuid.UUID) *TabUpdate {
+	tu.mutation.SetUID(u)
 	return tu
 }
 
@@ -216,6 +224,13 @@ func (tu *TabUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: tab.FieldFavicon,
 		})
 	}
+	if value, ok := tu.mutation.UID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: tab.FieldUID,
+		})
+	}
 	if tu.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -312,6 +327,12 @@ func (tuo *TabUpdateOne) SetNillableFavicon(s *string) *TabUpdateOne {
 // ClearFavicon clears the value of the "favicon" field.
 func (tuo *TabUpdateOne) ClearFavicon() *TabUpdateOne {
 	tuo.mutation.ClearFavicon()
+	return tuo
+}
+
+// SetUID sets the "uid" field.
+func (tuo *TabUpdateOne) SetUID(u uuid.UUID) *TabUpdateOne {
+	tuo.mutation.SetUID(u)
 	return tuo
 }
 
@@ -480,6 +501,13 @@ func (tuo *TabUpdateOne) sqlSave(ctx context.Context) (_node *Tab, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: tab.FieldFavicon,
+		})
+	}
+	if value, ok := tuo.mutation.UID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: tab.FieldUID,
 		})
 	}
 	if tuo.mutation.GroupCleared() {

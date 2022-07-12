@@ -53,6 +53,7 @@ var (
 		{Name: "url", Type: field.TypeString},
 		{Name: "seq", Type: field.TypeInt32},
 		{Name: "favicon", Type: field.TypeString, Nullable: true},
+		{Name: "uid", Type: field.TypeUUID},
 		{Name: "group_tabs", Type: field.TypeInt, Nullable: true},
 	}
 	// TabsTable holds the schema information for the "tabs" table.
@@ -63,7 +64,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tabs_groups_tabs",
-				Columns:    []*schema.Column{TabsColumns[5]},
+				Columns:    []*schema.Column{TabsColumns[6]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

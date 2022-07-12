@@ -5,7 +5,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 	"notification/ent/extensionclient"
@@ -302,15 +301,17 @@ func (ecq *ExtensionClientQuery) WithGroups(opts ...func(*GroupQuery)) *Extensio
 //		Scan(ctx, &v)
 //
 func (ecq *ExtensionClientQuery) GroupBy(field string, fields ...string) *ExtensionClientGroupBy {
-	group := &ExtensionClientGroupBy{config: ecq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &ExtensionClientGroupBy{config: ecq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := ecq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return ecq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = extensionclient.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -328,7 +329,10 @@ func (ecq *ExtensionClientQuery) GroupBy(field string, fields ...string) *Extens
 //
 func (ecq *ExtensionClientQuery) Select(fields ...string) *ExtensionClientSelect {
 	ecq.fields = append(ecq.fields, fields...)
-	return &ExtensionClientSelect{ExtensionClientQuery: ecq}
+	selbuild := &ExtensionClientSelect{ExtensionClientQuery: ecq}
+	selbuild.label = extensionclient.Label
+	selbuild.flds, selbuild.scan = &ecq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (ecq *ExtensionClientQuery) prepareQuery(ctx context.Context) error {
@@ -347,7 +351,7 @@ func (ecq *ExtensionClientQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (ecq *ExtensionClientQuery) sqlAll(ctx context.Context) ([]*ExtensionClient, error) {
+func (ecq *ExtensionClientQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ExtensionClient, error) {
 	var (
 		nodes       = []*ExtensionClient{}
 		_spec       = ecq.querySpec()
@@ -356,17 +360,16 @@ func (ecq *ExtensionClientQuery) sqlAll(ctx context.Context) ([]*ExtensionClient
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &ExtensionClient{config: ecq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*ExtensionClient).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &ExtensionClient{config: ecq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ecq.driver, _spec); err != nil {
 		return nil, err
@@ -507,6 +510,7 @@ func (ecq *ExtensionClientQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // ExtensionClientGroupBy is the group-by builder for ExtensionClient entities.
 type ExtensionClientGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -528,209 +532,6 @@ func (ecgb *ExtensionClientGroupBy) Scan(ctx context.Context, v interface{}) err
 	}
 	ecgb.sql = query
 	return ecgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := ecgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(ecgb.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := ecgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) StringsX(ctx context.Context) []string {
-	v, err := ecgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ecgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) StringX(ctx context.Context) string {
-	v, err := ecgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(ecgb.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := ecgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) IntsX(ctx context.Context) []int {
-	v, err := ecgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ecgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) IntX(ctx context.Context) int {
-	v, err := ecgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ecgb.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := ecgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := ecgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ecgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := ecgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(ecgb.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := ecgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := ecgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ecgb *ExtensionClientGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ecgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ecgb *ExtensionClientGroupBy) BoolX(ctx context.Context) bool {
-	v, err := ecgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ecgb *ExtensionClientGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -774,6 +575,7 @@ func (ecgb *ExtensionClientGroupBy) sqlQuery() *sql.Selector {
 // ExtensionClientSelect is the builder for selecting fields of ExtensionClient entities.
 type ExtensionClientSelect struct {
 	*ExtensionClientQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -785,201 +587,6 @@ func (ecs *ExtensionClientSelect) Scan(ctx context.Context, v interface{}) error
 	}
 	ecs.sql = ecs.ExtensionClientQuery.sqlQuery(ctx)
 	return ecs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ecs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ecs.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ecs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) StringsX(ctx context.Context) []string {
-	v, err := ecs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ecs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) StringX(ctx context.Context) string {
-	v, err := ecs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ecs.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ecs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) IntsX(ctx context.Context) []int {
-	v, err := ecs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ecs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) IntX(ctx context.Context) int {
-	v, err := ecs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ecs.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ecs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ecs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ecs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) Float64X(ctx context.Context) float64 {
-	v, err := ecs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ecs.fields) > 1 {
-		return nil, errors.New("ent: ExtensionClientSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ecs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ecs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ecs *ExtensionClientSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ecs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{extensionclient.Label}
-	default:
-		err = fmt.Errorf("ent: ExtensionClientSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ecs *ExtensionClientSelect) BoolX(ctx context.Context) bool {
-	v, err := ecs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ecs *ExtensionClientSelect) sqlScan(ctx context.Context, v interface{}) error {

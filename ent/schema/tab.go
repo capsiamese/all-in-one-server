@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Tab holds the schema definition for the Tab entity.
@@ -19,13 +20,14 @@ func (Tab) Fields() []ent.Field {
 		field.String("url"),
 		field.Int32("seq").Comment("sequence"),
 		field.String("favicon").Optional(),
+		field.UUID("uid", uuid.NewV4()),
 	}
 }
 
 // Edges of the Tab.
 func (Tab) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("group", Group.Type).Ref("tabs").Unique(),
+		edge.From("group", Group.Type).Ref("tabs").Unique().Annotations(edge.Annotation{StructTag: `json:"-"`}),
 	}
 }
 

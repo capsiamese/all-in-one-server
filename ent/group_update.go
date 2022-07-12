@@ -10,7 +10,7 @@ import (
 	"notification/ent/group"
 	"notification/ent/predicate"
 	"notification/ent/tab"
-	"notification/internal/entity"
+	"notification/internal/pb"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -72,15 +72,15 @@ func (gu *GroupUpdate) ClearShareURL() *GroupUpdate {
 }
 
 // SetOption sets the "option" field.
-func (gu *GroupUpdate) SetOption(eo entity.GroupOption) *GroupUpdate {
-	gu.mutation.SetOption(eo)
+func (gu *GroupUpdate) SetOption(po pb.GroupOption) *GroupUpdate {
+	gu.mutation.SetOption(po)
 	return gu
 }
 
 // SetNillableOption sets the "option" field if the given value is not nil.
-func (gu *GroupUpdate) SetNillableOption(eo *entity.GroupOption) *GroupUpdate {
-	if eo != nil {
-		gu.SetOption(*eo)
+func (gu *GroupUpdate) SetNillableOption(po *pb.GroupOption) *GroupUpdate {
+	if po != nil {
+		gu.SetOption(*po)
 	}
 	return gu
 }
@@ -423,15 +423,15 @@ func (guo *GroupUpdateOne) ClearShareURL() *GroupUpdateOne {
 }
 
 // SetOption sets the "option" field.
-func (guo *GroupUpdateOne) SetOption(eo entity.GroupOption) *GroupUpdateOne {
-	guo.mutation.SetOption(eo)
+func (guo *GroupUpdateOne) SetOption(po pb.GroupOption) *GroupUpdateOne {
+	guo.mutation.SetOption(po)
 	return guo
 }
 
 // SetNillableOption sets the "option" field if the given value is not nil.
-func (guo *GroupUpdateOne) SetNillableOption(eo *entity.GroupOption) *GroupUpdateOne {
-	if eo != nil {
-		guo.SetOption(*eo)
+func (guo *GroupUpdateOne) SetNillableOption(po *pb.GroupOption) *GroupUpdateOne {
+	if po != nil {
+		guo.SetOption(*po)
 	}
 	return guo
 }

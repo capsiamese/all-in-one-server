@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // Tab is the model entity for the Tab schema.
@@ -25,6 +27,8 @@ type Tab struct {
 	Seq int32 `json:"seq,omitempty"`
 	// Favicon holds the value of the "favicon" field.
 	Favicon string `json:"favicon,omitempty"`
+	// UID holds the value of the "uid" field.
+	UID uuid.UUID `json:"uid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TabQuery when eager-loading is set.
 	Edges      TabEdges `json:"edges" swaggerignore:"true"`
@@ -63,6 +67,8 @@ func (*Tab) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case tab.FieldName, tab.FieldURL, tab.FieldFavicon:
 			values[i] = new(sql.NullString)
+		case tab.FieldUID:
+			values[i] = new(uuid.UUID)
 		case tab.ForeignKeys[0]: // group_tabs
 			values[i] = new(sql.NullInt64)
 		default:
@@ -109,6 +115,12 @@ func (t *Tab) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field favicon", values[i])
 			} else if value.Valid {
 				t.Favicon = value.String
+			}
+		case tab.FieldUID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field uid", values[i])
+			} else if value != nil {
+				t.UID = *value
 			}
 		case tab.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -158,6 +170,8 @@ func (t *Tab) String() string {
 	builder.WriteString(fmt.Sprintf("%v", t.Seq))
 	builder.WriteString(", favicon=")
 	builder.WriteString(t.Favicon)
+	builder.WriteString(", uid=")
+	builder.WriteString(fmt.Sprintf("%v", t.UID))
 	builder.WriteByte(')')
 	return builder.String()
 }

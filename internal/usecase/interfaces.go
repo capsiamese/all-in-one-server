@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"notification/ent"
 	"notification/internal/entity"
+	"notification/internal/pb"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase
@@ -84,8 +85,13 @@ type (
 type (
 	Extension interface {
 		Register(ctx context.Context, name, extensionID string) (*ent.ExtensionClient, error)
-		Add(ctx context.Context, uid uuid.UUID, group ...*entity.GroupInfo) error
+		Add(ctx context.Context, uid uuid.UUID, group ...*pb.Group) error
 		Pull(ctx context.Context, uid uuid.UUID) (*ent.ExtensionClient, error)
+		RemoveGroup(ctx context.Context, uid, groupUid uuid.UUID) error
+		RemoveTab(ctx context.Context, uid, groupUid, tabUid uuid.UUID) error
+
+		SwapTab(ctx context.Context, uid, firstGroupUid, firstGroupTabUid, secondGroupUid, secondGroupTabUid uuid.UUID) error
+		//MoveTab(ctx context.Context, uid, fromGroup, toGroup, tabUid uuid.UUID) error
 
 		Connect(ctx context.Context, uid uuid.UUID, wsConn *websocket.Conn) error
 	}

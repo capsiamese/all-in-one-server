@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"notification/ent/extensionclient"
 	"notification/ent/group"
-	"notification/internal/entity"
+	"notification/internal/pb"
 	"strings"
 	"time"
 
@@ -29,7 +29,7 @@ type Group struct {
 	// ShareURL holds the value of the "share_url" field.
 	ShareURL string `json:"share_url,omitempty"`
 	// Option holds the value of the "option" field.
-	Option entity.GroupOption `json:"option,omitempty"`
+	Option pb.GroupOption `json:"option,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
 	Edges                   GroupEdges `json:"edges"`

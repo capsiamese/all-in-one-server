@@ -57,7 +57,7 @@ definitions:
         description: Name holds the value of the "name" field.
         type: string
       option:
-        $ref: '#/definitions/entity.GroupOption'
+        $ref: '#/definitions/pb.GroupOption'
         description: Option holds the value of the "option" field.
       share_url:
         description: ShareURL holds the value of the "share_url" field.
@@ -90,33 +90,44 @@ definitions:
           Seq holds the value of the "seq" field.
           sequence
         type: integer
+      uid:
+        description: UID holds the value of the "uid" field.
+        type: string
       url:
         description: URL holds the value of the "url" field.
         type: string
     type: object
-  entity.GroupInfo:
+  pb.Group:
     properties:
+      index:
+        type: integer
       name:
         type: string
       option:
-        $ref: '#/definitions/entity.GroupOption'
+        $ref: '#/definitions/pb.GroupOption'
       tabs:
         items:
-          $ref: '#/definitions/entity.Tab'
+          $ref: '#/definitions/pb.Tab'
         type: array
+      uid:
+        type: string
     type: object
-  entity.GroupOption:
+  pb.GroupOption:
     properties:
       tags:
         items:
           type: string
         type: array
     type: object
-  entity.Tab:
+  pb.Tab:
     properties:
       favicon:
         type: string
+      index:
+        type: integer
       name:
+        type: string
+      uid:
         type: string
       url:
         type: string
@@ -135,6 +146,61 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /ext/{uid}/{group}/:
+    delete:
+      consumes:
+      - application/json
+      description: remove tab group and all tabs
+      parameters:
+      - description: client uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: group uid
+        in: path
+        name: group
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ExtensionResponse'
+      tags:
+      - remove
+  /ext/{uid}/{group}/{tab}:
+    delete:
+      consumes:
+      - application/json
+      description: remove tab
+      parameters:
+      - description: client uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: group uid
+        in: path
+        name: group
+        required: true
+        type: string
+      - description: tab uid
+        in: path
+        name: tab
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ExtensionResponse'
+      tags:
+      - remove
   /ext/{uid}/group:
     get:
       consumes:
@@ -176,7 +242,7 @@ paths:
         required: true
         schema:
           items:
-            $ref: '#/definitions/entity.GroupInfo'
+            $ref: '#/definitions/pb.Group'
           type: array
       produces:
       - application/json
@@ -187,6 +253,46 @@ paths:
             $ref: '#/definitions/ExtensionResponse'
       tags:
       - add
+  /ext/{uid}/swap/tab:
+    post:
+      consumes:
+      - application/json
+      description: swap 2 tab
+      parameters:
+      - description: client uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: group(a) uid
+        in: query
+        name: groupA
+        required: true
+        type: string
+      - description: group(b) uid
+        in: query
+        name: groupB
+        required: true
+        type: string
+      - description: group(a) tab(a) uid
+        in: query
+        name: tabA
+        required: true
+        type: string
+      - description: group(b) tab(b) uid
+        in: query
+        name: tabB
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ExtensionResponse'
+      tags:
+      - modify
   /ext/register:
     post:
       description: get uid

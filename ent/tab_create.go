@@ -11,6 +11,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // TabCreate is the builder for creating a Tab entity.
@@ -49,6 +51,12 @@ func (tc *TabCreate) SetNillableFavicon(s *string) *TabCreate {
 	if s != nil {
 		tc.SetFavicon(*s)
 	}
+	return tc
+}
+
+// SetUID sets the "uid" field.
+func (tc *TabCreate) SetUID(u uuid.UUID) *TabCreate {
+	tc.mutation.SetUID(u)
 	return tc
 }
 
@@ -150,6 +158,9 @@ func (tc *TabCreate) check() error {
 	if _, ok := tc.mutation.Seq(); !ok {
 		return &ValidationError{Name: "seq", err: errors.New(`ent: missing required field "Tab.seq"`)}
 	}
+	if _, ok := tc.mutation.UID(); !ok {
+		return &ValidationError{Name: "uid", err: errors.New(`ent: missing required field "Tab.uid"`)}
+	}
 	return nil
 }
 
@@ -208,6 +219,14 @@ func (tc *TabCreate) createSpec() (*Tab, *sqlgraph.CreateSpec) {
 			Column: tab.FieldFavicon,
 		})
 		_node.Favicon = value
+	}
+	if value, ok := tc.mutation.UID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: tab.FieldUID,
+		})
+		_node.UID = value
 	}
 	if nodes := tc.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

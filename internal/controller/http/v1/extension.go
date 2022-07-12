@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
-	"notification/internal/entity"
+	"notification/internal/pb"
 	"notification/internal/usecase"
 	"notification/pkg/logger"
 )
@@ -19,13 +19,12 @@ func newExtensionRouter(e *gin.RouterGroup, l logger.Interface, ext usecase.Exte
 	g.POST("/register", r.register)
 	//g.Any("/connect", r.Connect)
 	{
-		client := g.Group("/:uid")
-		{
-			tabGroup := client.Group("/group")
-			tabGroup.GET("/", r.pull)
-			tabGroup.POST("/", r.addGroup)
-			tabGroup.DELETE("/:group", r.removeGroup)
-		}
+		g.GET("/:uid/group", r.pull)
+		g.POST("/:uid/group", r.addGroup)
+		g.DELETE("/:uid/:group/", r.removeGroup)
+		g.DELETE("/:uid/:group/:tab", r.removeTab)
+		//g.POST("/uid/swap/group")
+		g.POST("/:uid/swap/tab", r.swapTab)
 	}
 }
 
@@ -55,15 +54,15 @@ func (e *extensionRoutes) register(c *gin.Context) {
 // @Summery      store client tab group
 // @Description  store one or more tab group
 // @Tags         add
-// @Param        uid  path  string  true  "client uid"
-// @Param        groups  body  []entity.GroupInfo  true  "groups"
+// @Param        uid     path  string      true  "client uid"
+// @Param        groups  body  []pb.Group  true  "groups"
 // @Accept       json
 // @Produce      json
 // @Response     200  {object}  ExtensionResp{}
 // @Router       /ext/{uid}/group [post]
 func (e *extensionRoutes) addGroup(c *gin.Context) {
 	id := c.Param("uid")
-	groups := make([]*entity.GroupInfo, 0)
+	groups := make([]*pb.Group, 0)
 	err := c.ShouldBindJSON(&groups)
 	if err != nil {
 		ExtResp(c, 200, 1, err, nil)
@@ -86,7 +85,7 @@ func (e *extensionRoutes) addGroup(c *gin.Context) {
 // @Summery      pull all tab
 // @Description  get client's all groups and tabs
 // @Tags         pull
-// @Param        uid     path  string              true  "client uid"
+// @Param        uid     path   string  true  "client uid"
 // @Accept       json
 // @Produce      json
 // @Response     200  {object}  ExtensionResp{data=ent.ExtensionClient}
@@ -106,8 +105,78 @@ func (e *extensionRoutes) pull(c *gin.Context) {
 	ExtResp(c, 200, 0, nil, cli)
 }
 
+// removeGroup godoc
+// @Summery      remove a tab group
+// @Description  remove tab group and all tabs
+// @Tags         remove
+// @Param        uid    path  string  true  "client uid"
+// @Param        group  path  string  true  "group uid"
+// @Accept       json
+// @Produce      json
+// @Response     200  {object}  ExtensionResp{}
+// @Router       /ext/{uid}/{group}/ [delete]
 func (e *extensionRoutes) removeGroup(c *gin.Context) {
+	uid, err := uuid.FromString(c.Param("uid"))
+	if err != nil {
+		ExtResp(c, 200, 1, err, nil)
+		return
+	}
+	guid, err := uuid.FromString(c.Param("group"))
+	if err != nil {
+		ExtResp(c, 200, 1, err, nil)
+		return
+	}
+	err = e.e.RemoveGroup(c.Request.Context(), uid, guid)
+	if err != nil {
+		e.l.Errorln(err)
+	}
+}
 
+// removeTab godoc
+// @Summery      remove tab
+// @Description  remove tab
+// @Tags         remove
+// @Param        uid    path  string  true  "client uid"
+// @Param        group  path  string  true  "group uid"
+// @Param        tab    path  string  true  "tab uid"
+// @Accept       json
+// @Produce      json
+// @Response     200  {object}  ExtensionResp{}
+// @Router       /ext/{uid}/{group}/{tab} [delete]
+func (e *extensionRoutes) removeTab(c *gin.Context) {
+	uid := uuid.FromStringOrNil(c.Param("uid"))
+	gid := uuid.FromStringOrNil(c.Param("group"))
+	tid := uuid.FromStringOrNil(c.Param("tab"))
+	err := e.e.RemoveTab(c.Request.Context(), uid, gid, tid)
+	if err != nil {
+		e.l.Errorln(err)
+	}
+}
+
+// swapTab godoc
+// @Summery      swap tab a with tab b
+// @Description  swap 2 tab
+// @Tags         modify
+// @Param        uid  path  string  true  "client uid"
+// @Param        groupA  query  string  true  "group(a) uid"
+// @Param        groupB  query  string  true  "group(b) uid"
+// @Param        tabA    query  string  true  "group(a) tab(a) uid"
+// @Param        tabB    query  string  true  "group(b) tab(b) uid"
+// @Accept       json
+// @Produce      json
+// @Response     200  {object}  ExtensionResp{}
+// @Router       /ext/{uid}/swap/tab [post]
+func (e *extensionRoutes) swapTab(c *gin.Context) {
+	uid := uuid.FromStringOrNil(c.Param("uid"))
+	ga := uuid.FromStringOrNil(c.Query("groupA"))
+	gb := uuid.FromStringOrNil(c.Query("groupB"))
+	ta := uuid.FromStringOrNil(c.Query("tabA"))
+	tb := uuid.FromStringOrNil(c.Query("tabB"))
+
+	err := e.e.SwapTab(c.Request.Context(), uid, ga, ta, gb, tb)
+	if err != nil {
+		e.l.Errorln(err)
+	}
 }
 
 func (e *extensionRoutes) Connect(c *gin.Context) {

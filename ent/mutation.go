@@ -10,7 +10,7 @@ import (
 	"notification/ent/group"
 	"notification/ent/predicate"
 	"notification/ent/tab"
-	"notification/internal/entity"
+	"notification/internal/pb"
 	"sync"
 	"time"
 
@@ -608,7 +608,7 @@ type GroupMutation struct {
 	name          *string
 	created_at    *time.Time
 	share_url     *string
-	option        *entity.GroupOption
+	option        *pb.GroupOption
 	clearedFields map[string]struct{}
 	tabs          map[int]struct{}
 	removedtabs   map[int]struct{}
@@ -876,12 +876,12 @@ func (m *GroupMutation) ResetShareURL() {
 }
 
 // SetOption sets the "option" field.
-func (m *GroupMutation) SetOption(eo entity.GroupOption) {
-	m.option = &eo
+func (m *GroupMutation) SetOption(po pb.GroupOption) {
+	m.option = &po
 }
 
 // Option returns the value of the "option" field in the mutation.
-func (m *GroupMutation) Option() (r entity.GroupOption, exists bool) {
+func (m *GroupMutation) Option() (r pb.GroupOption, exists bool) {
 	v := m.option
 	if v == nil {
 		return
@@ -892,7 +892,7 @@ func (m *GroupMutation) Option() (r entity.GroupOption, exists bool) {
 // OldOption returns the old "option" field's value of the Group entity.
 // If the Group object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupMutation) OldOption(ctx context.Context) (v entity.GroupOption, err error) {
+func (m *GroupMutation) OldOption(ctx context.Context) (v pb.GroupOption, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOption is only allowed on UpdateOne operations")
 	}
@@ -1127,7 +1127,7 @@ func (m *GroupMutation) SetField(name string, value ent.Value) error {
 		m.SetShareURL(v)
 		return nil
 	case group.FieldOption:
-		v, ok := value.(entity.GroupOption)
+		v, ok := value.(pb.GroupOption)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1329,6 +1329,7 @@ type TabMutation struct {
 	seq           *int32
 	addseq        *int32
 	favicon       *string
+	uid           *uuid.UUID
 	clearedFields map[string]struct{}
 	group         *int
 	clearedgroup  bool
@@ -1612,6 +1613,42 @@ func (m *TabMutation) ResetFavicon() {
 	delete(m.clearedFields, tab.FieldFavicon)
 }
 
+// SetUID sets the "uid" field.
+func (m *TabMutation) SetUID(u uuid.UUID) {
+	m.uid = &u
+}
+
+// UID returns the value of the "uid" field in the mutation.
+func (m *TabMutation) UID() (r uuid.UUID, exists bool) {
+	v := m.uid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUID returns the old "uid" field's value of the Tab entity.
+// If the Tab object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TabMutation) OldUID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUID: %w", err)
+	}
+	return oldValue.UID, nil
+}
+
+// ResetUID resets all changes to the "uid" field.
+func (m *TabMutation) ResetUID() {
+	m.uid = nil
+}
+
 // SetGroupID sets the "group" edge to the Group entity by id.
 func (m *TabMutation) SetGroupID(id int) {
 	m.group = &id
@@ -1670,7 +1707,7 @@ func (m *TabMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TabMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, tab.FieldName)
 	}
@@ -1682,6 +1719,9 @@ func (m *TabMutation) Fields() []string {
 	}
 	if m.favicon != nil {
 		fields = append(fields, tab.FieldFavicon)
+	}
+	if m.uid != nil {
+		fields = append(fields, tab.FieldUID)
 	}
 	return fields
 }
@@ -1699,6 +1739,8 @@ func (m *TabMutation) Field(name string) (ent.Value, bool) {
 		return m.Seq()
 	case tab.FieldFavicon:
 		return m.Favicon()
+	case tab.FieldUID:
+		return m.UID()
 	}
 	return nil, false
 }
@@ -1716,6 +1758,8 @@ func (m *TabMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldSeq(ctx)
 	case tab.FieldFavicon:
 		return m.OldFavicon(ctx)
+	case tab.FieldUID:
+		return m.OldUID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Tab field %s", name)
 }
@@ -1752,6 +1796,13 @@ func (m *TabMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFavicon(v)
+		return nil
+	case tab.FieldUID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Tab field %s", name)
@@ -1837,6 +1888,9 @@ func (m *TabMutation) ResetField(name string) error {
 		return nil
 	case tab.FieldFavicon:
 		m.ResetFavicon()
+		return nil
+	case tab.FieldUID:
+		m.ResetUID()
 		return nil
 	}
 	return fmt.Errorf("unknown Tab field %s", name)

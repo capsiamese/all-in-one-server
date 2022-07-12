@@ -9,7 +9,7 @@ import (
 	"notification/ent/extensionclient"
 	"notification/ent/group"
 	"notification/ent/tab"
-	"notification/internal/entity"
+	"notification/internal/pb"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -58,15 +58,15 @@ func (gc *GroupCreate) SetNillableShareURL(s *string) *GroupCreate {
 }
 
 // SetOption sets the "option" field.
-func (gc *GroupCreate) SetOption(eo entity.GroupOption) *GroupCreate {
-	gc.mutation.SetOption(eo)
+func (gc *GroupCreate) SetOption(po pb.GroupOption) *GroupCreate {
+	gc.mutation.SetOption(po)
 	return gc
 }
 
 // SetNillableOption sets the "option" field if the given value is not nil.
-func (gc *GroupCreate) SetNillableOption(eo *entity.GroupOption) *GroupCreate {
-	if eo != nil {
-		gc.SetOption(*eo)
+func (gc *GroupCreate) SetNillableOption(po *pb.GroupOption) *GroupCreate {
+	if po != nil {
+		gc.SetOption(*po)
 	}
 	return gc
 }

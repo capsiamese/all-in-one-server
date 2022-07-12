@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	uuid "github.com/satori/go.uuid"
-	"notification/internal/entity"
+	"notification/internal/pb"
 )
 
 // Group holds the schema definition for the Group entity.
@@ -21,7 +21,7 @@ func (Group) Fields() []ent.Field {
 		field.String("name"),
 		field.Time("created_at"),
 		field.String("share_url").Optional(),
-		field.JSON("option", entity.GroupOption{}).Optional(),
+		field.JSON("option", pb.GroupOption{}).Optional(),
 	}
 }
 

@@ -15,6 +15,8 @@ const (
 	FieldSeq = "seq"
 	// FieldFavicon holds the string denoting the favicon field in the database.
 	FieldFavicon = "favicon"
+	// FieldUID holds the string denoting the uid field in the database.
+	FieldUID = "uid"
 	// EdgeGroup holds the string denoting the group edge name in mutations.
 	EdgeGroup = "group"
 	// Table holds the table name of the tab in the database.
@@ -35,6 +37,7 @@ var Columns = []string{
 	FieldURL,
 	FieldSeq,
 	FieldFavicon,
+	FieldUID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tabs"

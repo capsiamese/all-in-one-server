@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	uuid "github.com/satori/go.uuid"
 )
 
 // ID filters vertices based on their ID field.
@@ -117,6 +118,13 @@ func Seq(v int32) predicate.Tab {
 func Favicon(v string) predicate.Tab {
 	return predicate.Tab(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldFavicon), v))
+	})
+}
+
+// UID applies equality check predicate on the "uid" field. It's identical to UIDEQ.
+func UID(v uuid.UUID) predicate.Tab {
+	return predicate.Tab(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUID), v))
 	})
 }
 
@@ -540,6 +548,82 @@ func FaviconEqualFold(v string) predicate.Tab {
 func FaviconContainsFold(v string) predicate.Tab {
 	return predicate.Tab(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldFavicon), v))
+	})
+}
+
+// UIDEQ applies the EQ predicate on the "uid" field.
+func UIDEQ(v uuid.UUID) predicate.Tab {
+	return predicate.Tab(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUID), v))
+	})
+}
+
+// UIDNEQ applies the NEQ predicate on the "uid" field.
+func UIDNEQ(v uuid.UUID) predicate.Tab {
+	return predicate.Tab(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUID), v))
+	})
+}
+
+// UIDIn applies the In predicate on the "uid" field.
+func UIDIn(vs ...uuid.UUID) predicate.Tab {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Tab(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUID), v...))
+	})
+}
+
+// UIDNotIn applies the NotIn predicate on the "uid" field.
+func UIDNotIn(vs ...uuid.UUID) predicate.Tab {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Tab(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUID), v...))
+	})
+}
+
+// UIDGT applies the GT predicate on the "uid" field.
+func UIDGT(v uuid.UUID) predicate.Tab {
+	return predicate.Tab(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUID), v))
+	})
+}
+
+// UIDGTE applies the GTE predicate on the "uid" field.
+func UIDGTE(v uuid.UUID) predicate.Tab {
+	return predicate.Tab(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUID), v))
+	})
+}
+
+// UIDLT applies the LT predicate on the "uid" field.
+func UIDLT(v uuid.UUID) predicate.Tab {
+	return predicate.Tab(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUID), v))
+	})
+}
+
+// UIDLTE applies the LTE predicate on the "uid" field.
+func UIDLTE(v uuid.UUID) predicate.Tab {
+	return predicate.Tab(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUID), v))
 	})
 }
 
