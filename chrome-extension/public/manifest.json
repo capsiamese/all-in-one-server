@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "My Extension",
+  "version": "1.0",
+  "offline_enabled": true,
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "permissions": [
+    "tabs",
+    "alarms",
+    "storage",
+    "notifications",
+    "contextMenus",
+    "webNavigation"
+  ]
+}
