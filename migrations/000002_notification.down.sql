@@ -2,6 +2,8 @@ BEGIN;
 
 drop table if exists t_bark_device;
 
+drop table if exists t_bark_history;
+
 drop table if exists t_device;
 
 drop table if exists t_message;

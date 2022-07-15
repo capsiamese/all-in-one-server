@@ -32,7 +32,7 @@ func (uc *BarkUseCase) Push(ctx context.Context, key string, msg *entity.APNsMes
 		return err
 	}
 	msg.DeviceToken = d.DeviceToken
-	err = uc.repo.SaveMessage(ctx, msg)
+	err = uc.repo.SaveMessage(ctx, d, msg)
 	if err != nil {
 		uc.log.Errorln("save apns message %w", err)
 	}
@@ -66,6 +66,10 @@ func (uc *BarkUseCase) Register(ctx context.Context, device *entity.BarkDevice) 
 	return nil
 }
 
-func (uc *BarkUseCase) Pull(ctx context.Context, device *entity.BarkDevice, offset, limit int) ([]*entity.BarkHistory, error) {
-	return nil, nil
+func (uc *BarkUseCase) Pull(ctx context.Context, key string, offset, limit int) ([]*entity.BarkHistory, error) {
+	d, err := uc.repo.Get(ctx, &entity.BarkDevice{DeviceKey: key})
+	if err != nil {
+		return nil, err
+	}
+	return uc.repo.FetchHistory(ctx, d, offset, limit)
 }

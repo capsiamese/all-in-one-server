@@ -122,6 +122,13 @@ func ShareURL(v string) predicate.Group {
 	})
 }
 
+// Option applies equality check predicate on the "option" field. It's identical to OptionEQ.
+func Option(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOption), v))
+	})
+}
+
 // Seq applies equality check predicate on the "seq" field. It's identical to SeqEQ.
 func Seq(v int32) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
@@ -517,6 +524,103 @@ func ShareURLContainsFold(v string) predicate.Group {
 	})
 }
 
+// OptionEQ applies the EQ predicate on the "option" field.
+func OptionEQ(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOption), v))
+	})
+}
+
+// OptionNEQ applies the NEQ predicate on the "option" field.
+func OptionNEQ(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOption), v))
+	})
+}
+
+// OptionIn applies the In predicate on the "option" field.
+func OptionIn(vs ...string) predicate.Group {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldOption), v...))
+	})
+}
+
+// OptionNotIn applies the NotIn predicate on the "option" field.
+func OptionNotIn(vs ...string) predicate.Group {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldOption), v...))
+	})
+}
+
+// OptionGT applies the GT predicate on the "option" field.
+func OptionGT(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOption), v))
+	})
+}
+
+// OptionGTE applies the GTE predicate on the "option" field.
+func OptionGTE(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOption), v))
+	})
+}
+
+// OptionLT applies the LT predicate on the "option" field.
+func OptionLT(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOption), v))
+	})
+}
+
+// OptionLTE applies the LTE predicate on the "option" field.
+func OptionLTE(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOption), v))
+	})
+}
+
+// OptionContains applies the Contains predicate on the "option" field.
+func OptionContains(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldOption), v))
+	})
+}
+
+// OptionHasPrefix applies the HasPrefix predicate on the "option" field.
+func OptionHasPrefix(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldOption), v))
+	})
+}
+
+// OptionHasSuffix applies the HasSuffix predicate on the "option" field.
+func OptionHasSuffix(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldOption), v))
+	})
+}
+
 // OptionIsNil applies the IsNil predicate on the "option" field.
 func OptionIsNil() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
@@ -528,6 +632,20 @@ func OptionIsNil() predicate.Group {
 func OptionNotNil() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldOption)))
+	})
+}
+
+// OptionEqualFold applies the EqualFold predicate on the "option" field.
+func OptionEqualFold(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldOption), v))
+	})
+}
+
+// OptionContainsFold applies the ContainsFold predicate on the "option" field.
+func OptionContainsFold(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldOption), v))
 	})
 }
 

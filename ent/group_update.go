@@ -10,7 +10,6 @@ import (
 	"notification/ent/group"
 	"notification/ent/predicate"
 	"notification/ent/tab"
-	"notification/internal/pb"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -72,15 +71,15 @@ func (gu *GroupUpdate) ClearShareURL() *GroupUpdate {
 }
 
 // SetOption sets the "option" field.
-func (gu *GroupUpdate) SetOption(po pb.GroupOption) *GroupUpdate {
-	gu.mutation.SetOption(po)
+func (gu *GroupUpdate) SetOption(s string) *GroupUpdate {
+	gu.mutation.SetOption(s)
 	return gu
 }
 
 // SetNillableOption sets the "option" field if the given value is not nil.
-func (gu *GroupUpdate) SetNillableOption(po *pb.GroupOption) *GroupUpdate {
-	if po != nil {
-		gu.SetOption(*po)
+func (gu *GroupUpdate) SetNillableOption(s *string) *GroupUpdate {
+	if s != nil {
+		gu.SetOption(*s)
 	}
 	return gu
 }
@@ -278,14 +277,14 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := gu.mutation.Option(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: group.FieldOption,
 		})
 	}
 	if gu.mutation.OptionCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeString,
 			Column: group.FieldOption,
 		})
 	}
@@ -450,15 +449,15 @@ func (guo *GroupUpdateOne) ClearShareURL() *GroupUpdateOne {
 }
 
 // SetOption sets the "option" field.
-func (guo *GroupUpdateOne) SetOption(po pb.GroupOption) *GroupUpdateOne {
-	guo.mutation.SetOption(po)
+func (guo *GroupUpdateOne) SetOption(s string) *GroupUpdateOne {
+	guo.mutation.SetOption(s)
 	return guo
 }
 
 // SetNillableOption sets the "option" field if the given value is not nil.
-func (guo *GroupUpdateOne) SetNillableOption(po *pb.GroupOption) *GroupUpdateOne {
-	if po != nil {
-		guo.SetOption(*po)
+func (guo *GroupUpdateOne) SetNillableOption(s *string) *GroupUpdateOne {
+	if s != nil {
+		guo.SetOption(*s)
 	}
 	return guo
 }
@@ -680,14 +679,14 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if value, ok := guo.mutation.Option(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: group.FieldOption,
 		})
 	}
 	if guo.mutation.OptionCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeString,
 			Column: group.FieldOption,
 		})
 	}

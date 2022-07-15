@@ -88,7 +88,7 @@ func (e *extensionRoutes) addGroup(c *gin.Context) {
 // @Param        uid     path   string  true  "client uid"
 // @Accept       json
 // @Produce      json
-// @Response     200  {object}  ExtensionResp{data=ent.ExtensionClient}
+// @Response     200  {object}  ExtensionResp{data=pb.Client}
 // @Router       /ext/{uid}/group [get]
 func (e *extensionRoutes) pull(c *gin.Context) {
 	id := c.Param("uid")

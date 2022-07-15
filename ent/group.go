@@ -3,11 +3,9 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"notification/ent/extensionclient"
 	"notification/ent/group"
-	"notification/internal/pb"
 	"strings"
 	"time"
 
@@ -30,7 +28,7 @@ type Group struct {
 	// ShareURL holds the value of the "share_url" field.
 	ShareURL string `json:"share_url,omitempty"`
 	// Option holds the value of the "option" field.
-	Option pb.GroupOption `json:"option,omitempty"`
+	Option string `json:"option,omitempty"`
 	// Seq holds the value of the "seq" field.
 	Seq int32 `json:"seq,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -78,11 +76,9 @@ func (*Group) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case group.FieldOption:
-			values[i] = new([]byte)
 		case group.FieldID, group.FieldSeq:
 			values[i] = new(sql.NullInt64)
-		case group.FieldName, group.FieldShareURL:
+		case group.FieldName, group.FieldShareURL, group.FieldOption:
 			values[i] = new(sql.NullString)
 		case group.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -136,12 +132,10 @@ func (gr *Group) assignValues(columns []string, values []interface{}) error {
 				gr.ShareURL = value.String
 			}
 		case group.FieldOption:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field option", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &gr.Option); err != nil {
-					return fmt.Errorf("unmarshal field option: %w", err)
-				}
+			} else if value.Valid {
+				gr.Option = value.String
 			}
 		case group.FieldSeq:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -203,7 +197,7 @@ func (gr *Group) String() string {
 	builder.WriteString(", share_url=")
 	builder.WriteString(gr.ShareURL)
 	builder.WriteString(", option=")
-	builder.WriteString(fmt.Sprintf("%v", gr.Option))
+	builder.WriteString(gr.Option)
 	builder.WriteString(", seq=")
 	builder.WriteString(fmt.Sprintf("%v", gr.Seq))
 	builder.WriteByte(')')

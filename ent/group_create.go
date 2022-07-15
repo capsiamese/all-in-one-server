@@ -9,7 +9,6 @@ import (
 	"notification/ent/extensionclient"
 	"notification/ent/group"
 	"notification/ent/tab"
-	"notification/internal/pb"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -58,15 +57,15 @@ func (gc *GroupCreate) SetNillableShareURL(s *string) *GroupCreate {
 }
 
 // SetOption sets the "option" field.
-func (gc *GroupCreate) SetOption(po pb.GroupOption) *GroupCreate {
-	gc.mutation.SetOption(po)
+func (gc *GroupCreate) SetOption(s string) *GroupCreate {
+	gc.mutation.SetOption(s)
 	return gc
 }
 
 // SetNillableOption sets the "option" field if the given value is not nil.
-func (gc *GroupCreate) SetNillableOption(po *pb.GroupOption) *GroupCreate {
-	if po != nil {
-		gc.SetOption(*po)
+func (gc *GroupCreate) SetNillableOption(s *string) *GroupCreate {
+	if s != nil {
+		gc.SetOption(*s)
 	}
 	return gc
 }
@@ -254,7 +253,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := gc.mutation.Option(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: group.FieldOption,
 		})

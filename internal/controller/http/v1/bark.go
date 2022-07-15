@@ -21,6 +21,7 @@ func newBarkRouter(g *gin.RouterGroup, l logger.Interface, b usecase.Bark) {
 	e.GET("/info", r.info)
 	e.GET("/register", r.register)
 	e.GET("/:key/:content", r.push)
+	e.GET("/:key", r.pull)
 }
 
 func (r *barkRoutes) ping(c *gin.Context) {
@@ -49,10 +50,12 @@ func (r *barkRoutes) info(c *gin.Context) {
 func (r *barkRoutes) register(c *gin.Context) {
 	token := c.Query("devicetoken")
 	key := c.Query("key")
+	name := c.DefaultQuery("name", "none")
 
 	ent := &entity.BarkDevice{
 		DeviceToken: token,
 		DeviceKey:   key,
+		Name:        name,
 	}
 	err := r.b.Register(c.Request.Context(), ent)
 	if err != nil {
@@ -89,13 +92,18 @@ func (r *barkRoutes) push(c *gin.Context) {
 	if err != nil {
 		r.l.Errorln("push bark message", err)
 		barkResp(c, 400, "internal error", nil)
+		return
 	}
 	barkResp(c, 200, "success", nil)
 }
 
 func (r *barkRoutes) pull(c *gin.Context) {
-	_, err := r.b.Pull(nil, nil, 0, 0)
+	key := c.Param("key")
+	list, err := r.b.Pull(nil, key, 0, 100)
 	if err != nil {
-
+		r.l.Errorln("fetch bark history", err)
+		barkResp(c, 400, "internal error", nil)
+		return
 	}
+	barkResp(c, 200, "success", list)
 }

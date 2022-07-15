@@ -29,7 +29,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "share_url", Type: field.TypeString, Nullable: true},
-		{Name: "option", Type: field.TypeJSON, Nullable: true},
+		{Name: "option", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "seq", Type: field.TypeInt32},
 		{Name: "extension_client_groups", Type: field.TypeInt, Nullable: true},
 	}

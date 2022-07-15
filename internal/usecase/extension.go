@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
+	"google.golang.org/protobuf/encoding/prototext"
 	"notification/ent"
 	"notification/ent/extensionclient"
 	"notification/ent/group"
@@ -103,7 +104,9 @@ func createGroup(ctx context.Context, client *ent.Client, ext *ent.ExtensionClie
 		SetSeq(int32(n)).
 		SetName(group.GetName())
 	if group.GetOption() != nil {
-		cmd.SetOption(*group.GetOption())
+		if data, err := prototext.Marshal(group.GetOption()); err != nil {
+			cmd.SetOption(string(data))
+		}
 	}
 	return cmd.Save(ctx)
 }

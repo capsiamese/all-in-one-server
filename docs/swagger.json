@@ -114,7 +114,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/ent.ExtensionClient"
+                                            "$ref": "#/definitions/pb.Client"
                                         }
                                     }
                                 }
@@ -323,117 +323,25 @@
                 }
             }
         },
-        "ent.ExtensionClient": {
+        "pb.Client": {
             "type": "object",
             "properties": {
-                "client_uid": {
-                    "description": "ClientUID holds the value of the \"client_uid\" field.",
+                "ext_id": {
                     "type": "string"
                 },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the ExtensionClientQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.ExtensionClientEdges"
-                },
-                "extension_id": {
-                    "description": "ExtensionID holds the value of the \"extension_id\" field.",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "integer"
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pb.Group"
+                    }
                 },
                 "last_access_time": {
-                    "description": "LastAccessTime holds the value of the \"last_access_time\" field.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.ExtensionClientEdges": {
-            "type": "object",
-            "properties": {
-                "groups": {
-                    "description": "Groups holds the value of the groups edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Group"
-                    }
-                }
-            }
-        },
-        "ent.Group": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the GroupQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.GroupEdges"
-                },
-                "id": {
-                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                },
-                "option": {
-                    "description": "Option holds the value of the \"option\" field.",
-                    "$ref": "#/definitions/pb.GroupOption"
-                },
-                "share_url": {
-                    "description": "ShareURL holds the value of the \"share_url\" field.",
                     "type": "string"
                 },
                 "uid": {
-                    "description": "UID holds the value of the \"uid\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.GroupEdges": {
-            "type": "object",
-            "properties": {
-                "tabs": {
-                    "description": "Tabs holds the value of the tabs edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Tab"
-                    }
-                }
-            }
-        },
-        "ent.Tab": {
-            "type": "object",
-            "properties": {
-                "favicon": {
-                    "description": "Favicon holds the value of the \"favicon\" field.",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name holds the value of the \"name\" field.",
-                    "type": "string"
-                },
-                "seq": {
-                    "description": "Seq holds the value of the \"seq\" field.\nsequence",
-                    "type": "integer"
-                },
-                "uid": {
-                    "description": "UID holds the value of the \"uid\" field.",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "URL holds the value of the \"url\" field.",
                     "type": "string"
                 }
             }

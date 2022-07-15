@@ -16,13 +16,14 @@ type (
 	Bark interface {
 		Push(context.Context, string, *entity.APNsMessage) error
 		Register(context.Context, *entity.BarkDevice) error
-		Pull(ctx context.Context, device *entity.BarkDevice, offset, limit int) ([]*entity.BarkHistory, error)
+		Pull(ctx context.Context, key string, offset, limit int) ([]*entity.BarkHistory, error)
 	}
 
 	BarkRepo interface {
 		Store(context.Context, *entity.BarkDevice) error
 		Get(context.Context, *entity.BarkDevice) (*entity.BarkDevice, error)
-		SaveMessage(ctx context.Context, message *entity.APNsMessage) error
+		SaveMessage(ctx context.Context, device *entity.BarkDevice, message *entity.APNsMessage) error
+		FetchHistory(ctx context.Context, device *entity.BarkDevice, offset, limit int) ([]*entity.BarkHistory, error)
 	}
 
 	BarkWebAPI interface {

@@ -1,7 +1,7 @@
 package pb
 
 import (
-	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
 	"notification/ent"
 )
 
@@ -27,10 +27,6 @@ func GroupToPB(eg *ent.Group) *Group {
 	if eg == nil {
 		return nil
 	}
-	var op *GroupOption
-	if o, ok := proto.Clone(&eg.Option).(*GroupOption); ok {
-		op = o
-	}
 	tabs := make([]*Tab, 0, len(eg.Edges.Tabs))
 	for _, t := range eg.Edges.Tabs {
 		tabs = append(tabs, TabToPB(t))
@@ -39,8 +35,9 @@ func GroupToPB(eg *ent.Group) *Group {
 		Name:   eg.Name,
 		Uid:    eg.UID.String(),
 		Index:  eg.Seq,
-		Option: op,
+		Option: new(GroupOption),
 	}
+	_ = prototext.Unmarshal([]byte(eg.Option), g.Option)
 	return g
 }
 

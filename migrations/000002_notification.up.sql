@@ -4,7 +4,20 @@ create table t_bark_device
 (
     device_key   uuid         not null
         primary key,
-    device_token varchar(256) not null
+    device_token varchar(256) not null,
+    name         varchar(32)  not null
+);
+
+create table t_bark_history
+(
+    id           serial
+        constraint t_bark_history_pk
+            primary key,
+    device_key   uuid         not null,
+    device_token varchar(256) not null,
+    data         bytea        not null,
+    ts           timestamp    not null,
+    send_from    varchar(32)  not null
 );
 
 create table t_device

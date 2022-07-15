@@ -1,7 +1,9 @@
 package bark
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"github.com/Masterminds/squirrel"
@@ -9,11 +11,13 @@ import (
 	"notification/internal/usecase"
 	"notification/pkg/logger"
 	"notification/pkg/postgres"
+	"time"
 )
 
 var _ usecase.BarkRepo = (*Repo)(nil)
 
 const DeviceTable = "t_bark_device"
+const HistoryTable = "t_bark_history"
 
 type Repo struct {
 	p *postgres.Postgres
@@ -31,8 +35,8 @@ func (r *Repo) Store(ctx context.Context, device *entity.BarkDevice) error {
 	}
 	sql, args, err := r.p.Builder.
 		Insert(DeviceTable).
-		Columns("device_key, device_token").
-		Values(device.DeviceKey, device.DeviceToken).
+		Columns("device_key, device_token", "name").
+		Values(device.DeviceKey, device.DeviceToken, device.Name).
 		ToSql()
 	if err != nil {
 		return err
@@ -91,7 +95,56 @@ func (r *Repo) Get(ctx context.Context, device *entity.BarkDevice) (*entity.Bark
 	return obj, err
 }
 
-func (r *Repo) SaveMessage(ctx context.Context, message *entity.BarkHistory) error {
-	//TODO implement me
-	panic("implement me")
+func (r *Repo) SaveMessage(ctx context.Context, device *entity.BarkDevice, message *entity.APNsMessage) error {
+	buf := bytes.NewBuffer(make([]byte, 0))
+	err := gob.NewEncoder(buf).Encode(message.Data)
+	if err != nil {
+		return err
+	}
+	b := r.p.Builder.Insert(HistoryTable)
+	b.Columns("device_key", "device_token", "data", "ts", "send_from")
+	b.Values(device.DeviceKey, device.DeviceToken, buf.Bytes(), time.Now().Unix(), device.Name)
+	q, p, err := b.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.p.X.ExecContext(ctx, q, p...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Repo) FetchHistory(ctx context.Context, device *entity.BarkDevice, offset, limit int) ([]*entity.BarkHistory, error) {
+	q := r.p.Builder.Select(HistoryTable)
+	q.Columns("id", "device_key", "device_token", "data", "ts", "send_from")
+	q.Where(squirrel.Eq{"device_token": device.DeviceToken})
+	q.Offset(uint64(offset))
+	q.Limit(uint64(limit))
+	query, params, err := q.ToSql()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.p.X.QueryContext(ctx, query, params...)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*entity.BarkHistory, 0)
+	for rows.Next() {
+		item := new(entity.BarkHistory)
+		data := make([]byte, 0)
+		err = rows.Scan(&item.Id, &item.DeviceKey, &item.DeviceToken, &data, &item.Ts, &item.From)
+		if err != nil {
+			return nil, err
+		}
+		buf := bytes.NewBuffer(data)
+		m := make(map[string]any)
+		err = gob.NewDecoder(buf).Decode(&m)
+		if err != nil {
+			return nil, err
+		}
+		item.Data = m
+		list = append(list, item)
+	}
+	return list, nil
 }

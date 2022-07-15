@@ -10,7 +10,6 @@ import (
 	"notification/ent/group"
 	"notification/ent/predicate"
 	"notification/ent/tab"
-	"notification/internal/pb"
 	"sync"
 	"time"
 
@@ -608,7 +607,7 @@ type GroupMutation struct {
 	name          *string
 	created_at    *time.Time
 	share_url     *string
-	option        *pb.GroupOption
+	option        *string
 	seq           *int32
 	addseq        *int32
 	clearedFields map[string]struct{}
@@ -878,12 +877,12 @@ func (m *GroupMutation) ResetShareURL() {
 }
 
 // SetOption sets the "option" field.
-func (m *GroupMutation) SetOption(po pb.GroupOption) {
-	m.option = &po
+func (m *GroupMutation) SetOption(s string) {
+	m.option = &s
 }
 
 // Option returns the value of the "option" field in the mutation.
-func (m *GroupMutation) Option() (r pb.GroupOption, exists bool) {
+func (m *GroupMutation) Option() (r string, exists bool) {
 	v := m.option
 	if v == nil {
 		return
@@ -894,7 +893,7 @@ func (m *GroupMutation) Option() (r pb.GroupOption, exists bool) {
 // OldOption returns the old "option" field's value of the Group entity.
 // If the Group object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupMutation) OldOption(ctx context.Context) (v pb.GroupOption, err error) {
+func (m *GroupMutation) OldOption(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOption is only allowed on UpdateOne operations")
 	}
@@ -1192,7 +1191,7 @@ func (m *GroupMutation) SetField(name string, value ent.Value) error {
 		m.SetShareURL(v)
 		return nil
 	case group.FieldOption:
-		v, ok := value.(pb.GroupOption)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

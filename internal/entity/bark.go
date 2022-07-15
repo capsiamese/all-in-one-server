@@ -3,9 +3,16 @@ package entity
 type BarkDevice struct {
 	DeviceKey   string `db:"device_key" redis:"device_key"`
 	DeviceToken string `db:"device_token" redis:"device_token"`
+	Name        string `db:"name"`
 }
 
 type BarkHistory struct {
+	Id          int64          `db:"id"`
+	DeviceKey   string         `db:"device_key"`
+	DeviceToken string         `db:"device_token"`
+	Data        map[string]any `db:"data"`
+	Ts          int64          `db:"ts"`
+	From        string         `db:"send_from"`
 }
 
 type RegInfo struct {
