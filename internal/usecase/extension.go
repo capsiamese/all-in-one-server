@@ -92,10 +92,15 @@ func (e *ExtensionUseCase) Connect(ctx context.Context, uid uuid.UUID, wsConn *w
 }
 
 func createGroup(ctx context.Context, client *ent.Client, ext *ent.ExtensionClient, group *pb.Group) (*ent.Group, error) {
+	n, err := ext.QueryGroups().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
 	cmd := client.Group.Create().
 		SetUID(uuid.NewV4()).
 		SetCreatedAt(time.Now()).
 		SetClient(ext).
+		SetSeq(int32(n)).
 		SetName(group.GetName())
 	if group.GetOption() != nil {
 		cmd.SetOption(*group.GetOption())

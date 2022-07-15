@@ -102,7 +102,7 @@ func (e *extensionRoutes) pull(c *gin.Context) {
 		ExtResp(c, 200, 1, err, nil)
 		return
 	}
-	ExtResp(c, 200, 0, nil, cli)
+	ExtResp(c, 200, 0, nil, pb.ClientToPB(cli))
 }
 
 // removeGroup godoc
@@ -130,6 +130,7 @@ func (e *extensionRoutes) removeGroup(c *gin.Context) {
 	if err != nil {
 		e.l.Errorln(err)
 	}
+	//ExtResp()
 }
 
 // removeTab godoc
@@ -151,6 +152,7 @@ func (e *extensionRoutes) removeTab(c *gin.Context) {
 	if err != nil {
 		e.l.Errorln(err)
 	}
+	//ExtResp()
 }
 
 // swapTab godoc
@@ -177,6 +179,7 @@ func (e *extensionRoutes) swapTab(c *gin.Context) {
 	if err != nil {
 		e.l.Errorln(err)
 	}
+	//ExtResp()
 }
 
 func (e *extensionRoutes) Connect(c *gin.Context) {

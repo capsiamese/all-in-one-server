@@ -17,6 +17,8 @@ const (
 	FieldShareURL = "share_url"
 	// FieldOption holds the string denoting the option field in the database.
 	FieldOption = "option"
+	// FieldSeq holds the string denoting the seq field in the database.
+	FieldSeq = "seq"
 	// EdgeTabs holds the string denoting the tabs edge name in mutations.
 	EdgeTabs = "tabs"
 	// EdgeClient holds the string denoting the client edge name in mutations.
@@ -47,6 +49,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldShareURL,
 	FieldOption,
+	FieldSeq,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "groups"

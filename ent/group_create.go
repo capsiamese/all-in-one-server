@@ -71,6 +71,12 @@ func (gc *GroupCreate) SetNillableOption(po *pb.GroupOption) *GroupCreate {
 	return gc
 }
 
+// SetSeq sets the "seq" field.
+func (gc *GroupCreate) SetSeq(i int32) *GroupCreate {
+	gc.mutation.SetSeq(i)
+	return gc
+}
+
 // AddTabIDs adds the "tabs" edge to the Tab entity by IDs.
 func (gc *GroupCreate) AddTabIDs(ids ...int) *GroupCreate {
 	gc.mutation.AddTabIDs(ids...)
@@ -184,6 +190,9 @@ func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Group.created_at"`)}
 	}
+	if _, ok := gc.mutation.Seq(); !ok {
+		return &ValidationError{Name: "seq", err: errors.New(`ent: missing required field "Group.seq"`)}
+	}
 	return nil
 }
 
@@ -250,6 +259,14 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			Column: group.FieldOption,
 		})
 		_node.Option = value
+	}
+	if value, ok := gc.mutation.Seq(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: group.FieldSeq,
+		})
+		_node.Seq = value
 	}
 	if nodes := gc.mutation.TabsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

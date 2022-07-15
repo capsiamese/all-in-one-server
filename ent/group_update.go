@@ -91,6 +91,19 @@ func (gu *GroupUpdate) ClearOption() *GroupUpdate {
 	return gu
 }
 
+// SetSeq sets the "seq" field.
+func (gu *GroupUpdate) SetSeq(i int32) *GroupUpdate {
+	gu.mutation.ResetSeq()
+	gu.mutation.SetSeq(i)
+	return gu
+}
+
+// AddSeq adds i to the "seq" field.
+func (gu *GroupUpdate) AddSeq(i int32) *GroupUpdate {
+	gu.mutation.AddSeq(i)
+	return gu
+}
+
 // AddTabIDs adds the "tabs" edge to the Tab entity by IDs.
 func (gu *GroupUpdate) AddTabIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddTabIDs(ids...)
@@ -276,6 +289,20 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: group.FieldOption,
 		})
 	}
+	if value, ok := gu.mutation.Seq(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: group.FieldSeq,
+		})
+	}
+	if value, ok := gu.mutation.AddedSeq(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: group.FieldSeq,
+		})
+	}
 	if gu.mutation.TabsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -439,6 +466,19 @@ func (guo *GroupUpdateOne) SetNillableOption(po *pb.GroupOption) *GroupUpdateOne
 // ClearOption clears the value of the "option" field.
 func (guo *GroupUpdateOne) ClearOption() *GroupUpdateOne {
 	guo.mutation.ClearOption()
+	return guo
+}
+
+// SetSeq sets the "seq" field.
+func (guo *GroupUpdateOne) SetSeq(i int32) *GroupUpdateOne {
+	guo.mutation.ResetSeq()
+	guo.mutation.SetSeq(i)
+	return guo
+}
+
+// AddSeq adds i to the "seq" field.
+func (guo *GroupUpdateOne) AddSeq(i int32) *GroupUpdateOne {
+	guo.mutation.AddSeq(i)
 	return guo
 }
 
@@ -649,6 +689,20 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: group.FieldOption,
+		})
+	}
+	if value, ok := guo.mutation.Seq(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: group.FieldSeq,
+		})
+	}
+	if value, ok := guo.mutation.AddedSeq(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: group.FieldSeq,
 		})
 	}
 	if guo.mutation.TabsCleared() {

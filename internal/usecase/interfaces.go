@@ -16,12 +16,13 @@ type (
 	Bark interface {
 		Push(context.Context, string, *entity.APNsMessage) error
 		Register(context.Context, *entity.BarkDevice) error
+		Pull(ctx context.Context, device *entity.BarkDevice, offset, limit int) ([]*entity.BarkHistory, error)
 	}
 
 	BarkRepo interface {
 		Store(context.Context, *entity.BarkDevice) error
 		Get(context.Context, *entity.BarkDevice) (*entity.BarkDevice, error)
-		// TODO: save message
+		SaveMessage(ctx context.Context, message *entity.APNsMessage) error
 	}
 
 	BarkWebAPI interface {
@@ -85,8 +86,8 @@ type (
 type (
 	Extension interface {
 		Register(ctx context.Context, name, extensionID string) (*ent.ExtensionClient, error)
-		Add(ctx context.Context, uid uuid.UUID, group ...*pb.Group) error
 		Pull(ctx context.Context, uid uuid.UUID) (*ent.ExtensionClient, error)
+		Add(ctx context.Context, uid uuid.UUID, group ...*pb.Group) error
 		RemoveGroup(ctx context.Context, uid, groupUid uuid.UUID) error
 		RemoveTab(ctx context.Context, uid, groupUid, tabUid uuid.UUID) error
 

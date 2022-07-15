@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -30,6 +31,8 @@ type Group struct {
 	ShareURL string `json:"share_url,omitempty"`
 	// Option holds the value of the "option" field.
 	Option pb.GroupOption `json:"option,omitempty"`
+	// Seq holds the value of the "seq" field.
+	Seq int32 `json:"seq,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
 	Edges                   GroupEdges `json:"edges"`
@@ -77,7 +80,7 @@ func (*Group) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case group.FieldOption:
 			values[i] = new([]byte)
-		case group.FieldID:
+		case group.FieldID, group.FieldSeq:
 			values[i] = new(sql.NullInt64)
 		case group.FieldName, group.FieldShareURL:
 			values[i] = new(sql.NullString)
@@ -140,6 +143,12 @@ func (gr *Group) assignValues(columns []string, values []interface{}) error {
 					return fmt.Errorf("unmarshal field option: %w", err)
 				}
 			}
+		case group.FieldSeq:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field seq", values[i])
+			} else if value.Valid {
+				gr.Seq = int32(value.Int64)
+			}
 		case group.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field extension_client_groups", value)
@@ -195,6 +204,8 @@ func (gr *Group) String() string {
 	builder.WriteString(gr.ShareURL)
 	builder.WriteString(", option=")
 	builder.WriteString(fmt.Sprintf("%v", gr.Option))
+	builder.WriteString(", seq=")
+	builder.WriteString(fmt.Sprintf("%v", gr.Seq))
 	builder.WriteByte(')')
 	return builder.String()
 }

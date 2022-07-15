@@ -22,6 +22,7 @@ func (Group) Fields() []ent.Field {
 		field.Time("created_at"),
 		field.String("share_url").Optional(),
 		field.JSON("option", pb.GroupOption{}).Optional(),
+		field.Int32("seq"),
 	}
 }
 

@@ -29,7 +29,7 @@ func bark(t *testing.T) (*usecase.BarkUseCase, *MockBarkRepo) {
 	defer ctl.Finish()
 
 	repo := NewMockBarkRepo(ctl)
-	b := usecase.NewBark(repo, nil)
+	b := usecase.NewBark(repo, nil, nil)
 	return b, repo
 }
 

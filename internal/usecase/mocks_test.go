@@ -9,11 +9,12 @@ import (
 	http "net/http"
 	ent "notification/ent"
 	entity "notification/internal/entity"
+	pb "notification/internal/pb"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 	websocket "github.com/gorilla/websocket"
-	uuid "github.com/satori/go.uuid"
+	go_uuid "github.com/satori/go.uuid"
 )
 
 // MockBark is a mock of Bark interface.
@@ -37,6 +38,21 @@ func NewMockBark(ctrl *gomock.Controller) *MockBark {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockBark) EXPECT() *MockBarkMockRecorder {
 	return m.recorder
+}
+
+// Pull mocks base method.
+func (m *MockBark) Pull(ctx context.Context, device *entity.BarkDevice, offset, limit int) ([]*entity.BarkHistory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Pull", ctx, device, offset, limit)
+	ret0, _ := ret[0].([]*entity.BarkHistory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Pull indicates an expected call of Pull.
+func (mr *MockBarkMockRecorder) Pull(ctx, device, offset, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pull", reflect.TypeOf((*MockBark)(nil).Pull), ctx, device, offset, limit)
 }
 
 // Push mocks base method.
@@ -90,19 +106,33 @@ func (m *MockBarkRepo) EXPECT() *MockBarkRepoMockRecorder {
 	return m.recorder
 }
 
-// Pull mocks base method.
+// Get mocks base method.
 func (m *MockBarkRepo) Get(arg0 context.Context, arg1 *entity.BarkDevice) (*entity.BarkDevice, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Pull", arg0, arg1)
+	ret := m.ctrl.Call(m, "Get", arg0, arg1)
 	ret0, _ := ret[0].(*entity.BarkDevice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Pull indicates an expected call of Pull.
+// Get indicates an expected call of Get.
 func (mr *MockBarkRepoMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pull", reflect.TypeOf((*MockBarkRepo)(nil).Get), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBarkRepo)(nil).Get), arg0, arg1)
+}
+
+// SaveMessage mocks base method.
+func (m *MockBarkRepo) SaveMessage(ctx context.Context, message *entity.APNsMessage) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveMessage", ctx, message)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveMessage indicates an expected call of SaveMessage.
+func (mr *MockBarkRepoMockRecorder) SaveMessage(ctx, message interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveMessage", reflect.TypeOf((*MockBarkRepo)(nil).SaveMessage), ctx, message)
 }
 
 // Store mocks base method.
@@ -736,8 +766,27 @@ func (m *MockExtension) EXPECT() *MockExtensionMockRecorder {
 	return m.recorder
 }
 
+// Add mocks base method.
+func (m *MockExtension) Add(ctx context.Context, uid go_uuid.UUID, group ...*pb.Group) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, uid}
+	for _, a := range group {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Add", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Add indicates an expected call of Add.
+func (mr *MockExtensionMockRecorder) Add(ctx, uid interface{}, group ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, uid}, group...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockExtension)(nil).Add), varargs...)
+}
+
 // Connect mocks base method.
-func (m *MockExtension) Connect(ctx context.Context, uid uuid.UUID, wsConn *websocket.Conn) error {
+func (m *MockExtension) Connect(ctx context.Context, uid go_uuid.UUID, wsConn *websocket.Conn) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Connect", ctx, uid, wsConn)
 	ret0, _ := ret[0].(error)
@@ -748,6 +797,21 @@ func (m *MockExtension) Connect(ctx context.Context, uid uuid.UUID, wsConn *webs
 func (mr *MockExtensionMockRecorder) Connect(ctx, uid, wsConn interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Connect", reflect.TypeOf((*MockExtension)(nil).Connect), ctx, uid, wsConn)
+}
+
+// Pull mocks base method.
+func (m *MockExtension) Pull(ctx context.Context, uid go_uuid.UUID) (*ent.ExtensionClient, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Pull", ctx, uid)
+	ret0, _ := ret[0].(*ent.ExtensionClient)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Pull indicates an expected call of Pull.
+func (mr *MockExtensionMockRecorder) Pull(ctx, uid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pull", reflect.TypeOf((*MockExtension)(nil).Pull), ctx, uid)
 }
 
 // Register mocks base method.
@@ -763,4 +827,46 @@ func (m *MockExtension) Register(ctx context.Context, name, extensionID string) 
 func (mr *MockExtensionMockRecorder) Register(ctx, name, extensionID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockExtension)(nil).Register), ctx, name, extensionID)
+}
+
+// RemoveGroup mocks base method.
+func (m *MockExtension) RemoveGroup(ctx context.Context, uid, groupUid go_uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveGroup", ctx, uid, groupUid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveGroup indicates an expected call of RemoveGroup.
+func (mr *MockExtensionMockRecorder) RemoveGroup(ctx, uid, groupUid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveGroup", reflect.TypeOf((*MockExtension)(nil).RemoveGroup), ctx, uid, groupUid)
+}
+
+// RemoveTab mocks base method.
+func (m *MockExtension) RemoveTab(ctx context.Context, uid, groupUid, tabUid go_uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveTab", ctx, uid, groupUid, tabUid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveTab indicates an expected call of RemoveTab.
+func (mr *MockExtensionMockRecorder) RemoveTab(ctx, uid, groupUid, tabUid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveTab", reflect.TypeOf((*MockExtension)(nil).RemoveTab), ctx, uid, groupUid, tabUid)
+}
+
+// SwapTab mocks base method.
+func (m *MockExtension) SwapTab(ctx context.Context, uid, firstGroupUid, firstGroupTabUid, secondGroupUid, secondGroupTabUid go_uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SwapTab", ctx, uid, firstGroupUid, firstGroupTabUid, secondGroupUid, secondGroupTabUid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SwapTab indicates an expected call of SwapTab.
+func (mr *MockExtensionMockRecorder) SwapTab(ctx, uid, firstGroupUid, firstGroupTabUid, secondGroupUid, secondGroupTabUid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SwapTab", reflect.TypeOf((*MockExtension)(nil).SwapTab), ctx, uid, firstGroupUid, firstGroupTabUid, secondGroupUid, secondGroupTabUid)
 }

@@ -90,3 +90,8 @@ func (r *Repo) Get(ctx context.Context, device *entity.BarkDevice) (*entity.Bark
 	err = r.p.X.GetContext(ctx, obj, sql, args...)
 	return obj, err
 }
+
+func (r *Repo) SaveMessage(ctx context.Context, message *entity.BarkHistory) error {
+	//TODO implement me
+	panic("implement me")
+}

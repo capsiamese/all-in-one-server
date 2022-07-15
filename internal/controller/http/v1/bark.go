@@ -92,3 +92,10 @@ func (r *barkRoutes) push(c *gin.Context) {
 	}
 	barkResp(c, 200, "success", nil)
 }
+
+func (r *barkRoutes) pull(c *gin.Context) {
+	_, err := r.b.Pull(nil, nil, 0, 0)
+	if err != nil {
+
+	}
+}

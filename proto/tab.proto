@@ -22,3 +22,11 @@ message Group {
   GroupOption option = 4;
   repeated Tab tabs = 5;
 }
+
+message Client {
+  string name = 1;
+  string ext_id = 2;
+  string uid = 3;
+  int64 last_access_time = 4;
+  repeated Group groups = 5;
+}

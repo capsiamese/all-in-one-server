@@ -609,6 +609,8 @@ type GroupMutation struct {
 	created_at    *time.Time
 	share_url     *string
 	option        *pb.GroupOption
+	seq           *int32
+	addseq        *int32
 	clearedFields map[string]struct{}
 	tabs          map[int]struct{}
 	removedtabs   map[int]struct{}
@@ -924,6 +926,62 @@ func (m *GroupMutation) ResetOption() {
 	delete(m.clearedFields, group.FieldOption)
 }
 
+// SetSeq sets the "seq" field.
+func (m *GroupMutation) SetSeq(i int32) {
+	m.seq = &i
+	m.addseq = nil
+}
+
+// Seq returns the value of the "seq" field in the mutation.
+func (m *GroupMutation) Seq() (r int32, exists bool) {
+	v := m.seq
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeq returns the old "seq" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldSeq(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeq is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeq requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeq: %w", err)
+	}
+	return oldValue.Seq, nil
+}
+
+// AddSeq adds i to the "seq" field.
+func (m *GroupMutation) AddSeq(i int32) {
+	if m.addseq != nil {
+		*m.addseq += i
+	} else {
+		m.addseq = &i
+	}
+}
+
+// AddedSeq returns the value that was added to the "seq" field in this mutation.
+func (m *GroupMutation) AddedSeq() (r int32, exists bool) {
+	v := m.addseq
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSeq resets all changes to the "seq" field.
+func (m *GroupMutation) ResetSeq() {
+	m.seq = nil
+	m.addseq = nil
+}
+
 // AddTabIDs adds the "tabs" edge to the Tab entity by ids.
 func (m *GroupMutation) AddTabIDs(ids ...int) {
 	if m.tabs == nil {
@@ -1036,7 +1094,7 @@ func (m *GroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.uid != nil {
 		fields = append(fields, group.FieldUID)
 	}
@@ -1051,6 +1109,9 @@ func (m *GroupMutation) Fields() []string {
 	}
 	if m.option != nil {
 		fields = append(fields, group.FieldOption)
+	}
+	if m.seq != nil {
+		fields = append(fields, group.FieldSeq)
 	}
 	return fields
 }
@@ -1070,6 +1131,8 @@ func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 		return m.ShareURL()
 	case group.FieldOption:
 		return m.Option()
+	case group.FieldSeq:
+		return m.Seq()
 	}
 	return nil, false
 }
@@ -1089,6 +1152,8 @@ func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldShareURL(ctx)
 	case group.FieldOption:
 		return m.OldOption(ctx)
+	case group.FieldSeq:
+		return m.OldSeq(ctx)
 	}
 	return nil, fmt.Errorf("unknown Group field %s", name)
 }
@@ -1133,6 +1198,13 @@ func (m *GroupMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetOption(v)
 		return nil
+	case group.FieldSeq:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeq(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Group field %s", name)
 }
@@ -1140,13 +1212,21 @@ func (m *GroupMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *GroupMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addseq != nil {
+		fields = append(fields, group.FieldSeq)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *GroupMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case group.FieldSeq:
+		return m.AddedSeq()
+	}
 	return nil, false
 }
 
@@ -1155,6 +1235,13 @@ func (m *GroupMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *GroupMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case group.FieldSeq:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSeq(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Group numeric field %s", name)
 }
@@ -1211,6 +1298,9 @@ func (m *GroupMutation) ResetField(name string) error {
 		return nil
 	case group.FieldOption:
 		m.ResetOption()
+		return nil
+	case group.FieldSeq:
+		m.ResetSeq()
 		return nil
 	}
 	return fmt.Errorf("unknown Group field %s", name)

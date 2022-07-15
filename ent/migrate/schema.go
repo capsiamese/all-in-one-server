@@ -30,6 +30,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "share_url", Type: field.TypeString, Nullable: true},
 		{Name: "option", Type: field.TypeJSON, Nullable: true},
+		{Name: "seq", Type: field.TypeInt32},
 		{Name: "extension_client_groups", Type: field.TypeInt, Nullable: true},
 	}
 	// GroupsTable holds the schema information for the "groups" table.
@@ -40,7 +41,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "groups_extension_clients_groups",
-				Columns:    []*schema.Column{GroupsColumns[6]},
+				Columns:    []*schema.Column{GroupsColumns[7]},
 				RefColumns: []*schema.Column{ExtensionClientsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -122,6 +122,13 @@ func ShareURL(v string) predicate.Group {
 	})
 }
 
+// Seq applies equality check predicate on the "seq" field. It's identical to SeqEQ.
+func Seq(v int32) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSeq), v))
+	})
+}
+
 // UIDEQ applies the EQ predicate on the "uid" field.
 func UIDEQ(v uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
@@ -521,6 +528,82 @@ func OptionIsNil() predicate.Group {
 func OptionNotNil() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldOption)))
+	})
+}
+
+// SeqEQ applies the EQ predicate on the "seq" field.
+func SeqEQ(v int32) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSeq), v))
+	})
+}
+
+// SeqNEQ applies the NEQ predicate on the "seq" field.
+func SeqNEQ(v int32) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSeq), v))
+	})
+}
+
+// SeqIn applies the In predicate on the "seq" field.
+func SeqIn(vs ...int32) predicate.Group {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSeq), v...))
+	})
+}
+
+// SeqNotIn applies the NotIn predicate on the "seq" field.
+func SeqNotIn(vs ...int32) predicate.Group {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSeq), v...))
+	})
+}
+
+// SeqGT applies the GT predicate on the "seq" field.
+func SeqGT(v int32) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSeq), v))
+	})
+}
+
+// SeqGTE applies the GTE predicate on the "seq" field.
+func SeqGTE(v int32) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSeq), v))
+	})
+}
+
+// SeqLT applies the LT predicate on the "seq" field.
+func SeqLT(v int32) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSeq), v))
+	})
+}
+
+// SeqLTE applies the LTE predicate on the "seq" field.
+func SeqLTE(v int32) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSeq), v))
 	})
 }
 
