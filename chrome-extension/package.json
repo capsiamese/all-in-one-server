@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack",
-    "protogen": "pbjs -t static-module -w commonjs -o src/pb/compiled.js src/pb/*.proto",
+    "protogen": "pbjs -t static-module -w commonjs -o src/pb/compiled.js ../proto/*.proto",
     "protogents": "pbts -o src/pb/compiled.d.ts src/pb/compiled.js"
   },
   "devDependencies": {

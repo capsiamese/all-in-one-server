@@ -1,6 +1,8 @@
 package app
 
 import (
+	"aio/ent"
+	entMigrate "aio/ent/migrate"
 	"context"
 	"errors"
 	"github.com/golang-migrate/migrate/v4"
@@ -8,8 +10,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/urfave/cli/v2"
 	"log"
-	"notification/ent"
-	entMigrate "notification/ent/migrate"
 )
 
 var MigrateCmd = &cli.Command{

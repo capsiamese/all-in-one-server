@@ -3,7 +3,7 @@
 package tab
 
 import (
-	"notification/ent/predicate"
+	"aio/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

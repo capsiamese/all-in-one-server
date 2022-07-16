@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"notification/internal/entity"
+	"aio/internal/entity"
 )
 
 func (r *pushDeerRoutes) reg(c *gin.Context) {

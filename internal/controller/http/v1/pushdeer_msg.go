@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"notification/internal/entity"
+	"aio/internal/entity"
 	"strconv"
 	"time"
 )

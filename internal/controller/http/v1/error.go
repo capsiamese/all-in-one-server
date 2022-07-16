@@ -1,8 +1,8 @@
 package v1
 
 import (
+	"aio/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"notification/pkg/logger"
 	"runtime"
 	"strings"
 	"time"

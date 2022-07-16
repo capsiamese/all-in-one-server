@@ -8,12 +8,12 @@ import (
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 	"google.golang.org/protobuf/encoding/prototext"
-	"notification/ent"
-	"notification/ent/extensionclient"
-	"notification/ent/group"
-	"notification/ent/tab"
-	"notification/internal/pb"
-	"notification/pkg/logger"
+	"aio/ent"
+	"aio/ent/extensionclient"
+	"aio/ent/group"
+	"aio/ent/tab"
+	"aio/internal/pb"
+	"aio/pkg/logger"
 	"time"
 )
 

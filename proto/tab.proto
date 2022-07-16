@@ -30,3 +30,11 @@ message Client {
   int64 last_access_time = 4;
   repeated Group groups = 5;
 }
+
+message BarkHistory {
+  int64 id = 1;
+  int64 ts = 2;
+  string from = 3;
+  string key = 4;
+  map<string, string> data = 5;
+}

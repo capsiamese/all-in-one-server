@@ -3,9 +3,9 @@
 package ent
 
 import (
+	"aio/ent/group"
+	"aio/ent/tab"
 	"fmt"
-	"notification/ent/group"
-	"notification/ent/tab"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"

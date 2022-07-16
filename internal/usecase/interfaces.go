@@ -1,13 +1,13 @@
 package usecase
 
 import (
+	"aio/ent"
+	"aio/internal/entity"
+	"aio/internal/pb"
 	"context"
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 	"net/http"
-	"notification/ent"
-	"notification/internal/entity"
-	"notification/internal/pb"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase

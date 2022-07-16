@@ -1,6 +1,9 @@
 package webapi
 
 import (
+	"aio/internal/entity"
+	"aio/internal/usecase"
+	"aio/pkg/logger"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -11,9 +14,7 @@ import (
 	"github.com/sideshow/apns2/token"
 	"golang.org/x/net/http2"
 	"net/http"
-	"notification/internal/entity"
-	"notification/internal/usecase"
-	"notification/pkg/logger"
+
 	"strings"
 	"time"
 )
@@ -69,10 +70,7 @@ func (api *BarkAPNsAPI) Push(ctx context.Context, msg *entity.APNsMessage) error
 
 	group, ok := msg.Data["group"]
 	if ok {
-		g, ok := group.(string)
-		if ok {
-			pl = pl.ThreadID(g)
-		}
+		pl = pl.ThreadID(group)
 	}
 
 	for k, v := range msg.Data {

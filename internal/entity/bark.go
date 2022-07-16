@@ -29,5 +29,5 @@ type APNsMessage struct {
 	Title       string
 	Body        string
 	Sound       string
-	Data        map[string]interface{}
+	Data        map[string]string
 }

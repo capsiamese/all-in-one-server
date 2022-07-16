@@ -3,10 +3,10 @@
 package ent
 
 import (
+	"aio/ent/extensionclient"
+	"aio/ent/predicate"
 	"context"
 	"fmt"
-	"notification/ent/extensionclient"
-	"notification/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

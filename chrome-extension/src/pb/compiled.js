@@ -856,6 +856,338 @@ $root.tab = (function() {
         return Group;
     })();
 
+    tab.Client = (function() {
+
+        /**
+         * Properties of a Client.
+         * @memberof tab
+         * @interface IClient
+         * @property {string|null} [name] Client name
+         * @property {string|null} [extId] Client extId
+         * @property {string|null} [uid] Client uid
+         * @property {number|Long|null} [lastAccessTime] Client lastAccessTime
+         * @property {Array.<tab.IGroup>|null} [groups] Client groups
+         */
+
+        /**
+         * Constructs a new Client.
+         * @memberof tab
+         * @classdesc Represents a Client.
+         * @implements IClient
+         * @constructor
+         * @param {tab.IClient=} [properties] Properties to set
+         */
+        function Client(properties) {
+            this.groups = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * Client name.
+         * @member {string} name
+         * @memberof tab.Client
+         * @instance
+         */
+        Client.prototype.name = "";
+
+        /**
+         * Client extId.
+         * @member {string} extId
+         * @memberof tab.Client
+         * @instance
+         */
+        Client.prototype.extId = "";
+
+        /**
+         * Client uid.
+         * @member {string} uid
+         * @memberof tab.Client
+         * @instance
+         */
+        Client.prototype.uid = "";
+
+        /**
+         * Client lastAccessTime.
+         * @member {number|Long} lastAccessTime
+         * @memberof tab.Client
+         * @instance
+         */
+        Client.prototype.lastAccessTime = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+        /**
+         * Client groups.
+         * @member {Array.<tab.IGroup>} groups
+         * @memberof tab.Client
+         * @instance
+         */
+        Client.prototype.groups = $util.emptyArray;
+
+        /**
+         * Creates a new Client instance using the specified properties.
+         * @function create
+         * @memberof tab.Client
+         * @static
+         * @param {tab.IClient=} [properties] Properties to set
+         * @returns {tab.Client} Client instance
+         */
+        Client.create = function create(properties) {
+            return new Client(properties);
+        };
+
+        /**
+         * Encodes the specified Client message. Does not implicitly {@link tab.Client.verify|verify} messages.
+         * @function encode
+         * @memberof tab.Client
+         * @static
+         * @param {tab.IClient} message Client message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Client.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+            if (message.extId != null && Object.hasOwnProperty.call(message, "extId"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.extId);
+            if (message.uid != null && Object.hasOwnProperty.call(message, "uid"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.uid);
+            if (message.lastAccessTime != null && Object.hasOwnProperty.call(message, "lastAccessTime"))
+                writer.uint32(/* id 4, wireType 0 =*/32).int64(message.lastAccessTime);
+            if (message.groups != null && message.groups.length)
+                for (var i = 0; i < message.groups.length; ++i)
+                    $root.tab.Group.encode(message.groups[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified Client message, length delimited. Does not implicitly {@link tab.Client.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof tab.Client
+         * @static
+         * @param {tab.IClient} message Client message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Client.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a Client message from the specified reader or buffer.
+         * @function decode
+         * @memberof tab.Client
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {tab.Client} Client
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Client.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.tab.Client();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.name = reader.string();
+                        break;
+                    }
+                case 2: {
+                        message.extId = reader.string();
+                        break;
+                    }
+                case 3: {
+                        message.uid = reader.string();
+                        break;
+                    }
+                case 4: {
+                        message.lastAccessTime = reader.int64();
+                        break;
+                    }
+                case 5: {
+                        if (!(message.groups && message.groups.length))
+                            message.groups = [];
+                        message.groups.push($root.tab.Group.decode(reader, reader.uint32()));
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a Client message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof tab.Client
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {tab.Client} Client
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Client.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a Client message.
+         * @function verify
+         * @memberof tab.Client
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        Client.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.name != null && message.hasOwnProperty("name"))
+                if (!$util.isString(message.name))
+                    return "name: string expected";
+            if (message.extId != null && message.hasOwnProperty("extId"))
+                if (!$util.isString(message.extId))
+                    return "extId: string expected";
+            if (message.uid != null && message.hasOwnProperty("uid"))
+                if (!$util.isString(message.uid))
+                    return "uid: string expected";
+            if (message.lastAccessTime != null && message.hasOwnProperty("lastAccessTime"))
+                if (!$util.isInteger(message.lastAccessTime) && !(message.lastAccessTime && $util.isInteger(message.lastAccessTime.low) && $util.isInteger(message.lastAccessTime.high)))
+                    return "lastAccessTime: integer|Long expected";
+            if (message.groups != null && message.hasOwnProperty("groups")) {
+                if (!Array.isArray(message.groups))
+                    return "groups: array expected";
+                for (var i = 0; i < message.groups.length; ++i) {
+                    var error = $root.tab.Group.verify(message.groups[i]);
+                    if (error)
+                        return "groups." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a Client message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof tab.Client
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {tab.Client} Client
+         */
+        Client.fromObject = function fromObject(object) {
+            if (object instanceof $root.tab.Client)
+                return object;
+            var message = new $root.tab.Client();
+            if (object.name != null)
+                message.name = String(object.name);
+            if (object.extId != null)
+                message.extId = String(object.extId);
+            if (object.uid != null)
+                message.uid = String(object.uid);
+            if (object.lastAccessTime != null)
+                if ($util.Long)
+                    (message.lastAccessTime = $util.Long.fromValue(object.lastAccessTime)).unsigned = false;
+                else if (typeof object.lastAccessTime === "string")
+                    message.lastAccessTime = parseInt(object.lastAccessTime, 10);
+                else if (typeof object.lastAccessTime === "number")
+                    message.lastAccessTime = object.lastAccessTime;
+                else if (typeof object.lastAccessTime === "object")
+                    message.lastAccessTime = new $util.LongBits(object.lastAccessTime.low >>> 0, object.lastAccessTime.high >>> 0).toNumber();
+            if (object.groups) {
+                if (!Array.isArray(object.groups))
+                    throw TypeError(".tab.Client.groups: array expected");
+                message.groups = [];
+                for (var i = 0; i < object.groups.length; ++i) {
+                    if (typeof object.groups[i] !== "object")
+                        throw TypeError(".tab.Client.groups: object expected");
+                    message.groups[i] = $root.tab.Group.fromObject(object.groups[i]);
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a Client message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof tab.Client
+         * @static
+         * @param {tab.Client} message Client
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        Client.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.groups = [];
+            if (options.defaults) {
+                object.name = "";
+                object.extId = "";
+                object.uid = "";
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.lastAccessTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.lastAccessTime = options.longs === String ? "0" : 0;
+            }
+            if (message.name != null && message.hasOwnProperty("name"))
+                object.name = message.name;
+            if (message.extId != null && message.hasOwnProperty("extId"))
+                object.extId = message.extId;
+            if (message.uid != null && message.hasOwnProperty("uid"))
+                object.uid = message.uid;
+            if (message.lastAccessTime != null && message.hasOwnProperty("lastAccessTime"))
+                if (typeof message.lastAccessTime === "number")
+                    object.lastAccessTime = options.longs === String ? String(message.lastAccessTime) : message.lastAccessTime;
+                else
+                    object.lastAccessTime = options.longs === String ? $util.Long.prototype.toString.call(message.lastAccessTime) : options.longs === Number ? new $util.LongBits(message.lastAccessTime.low >>> 0, message.lastAccessTime.high >>> 0).toNumber() : message.lastAccessTime;
+            if (message.groups && message.groups.length) {
+                object.groups = [];
+                for (var j = 0; j < message.groups.length; ++j)
+                    object.groups[j] = $root.tab.Group.toObject(message.groups[j], options);
+            }
+            return object;
+        };
+
+        /**
+         * Converts this Client to JSON.
+         * @function toJSON
+         * @memberof tab.Client
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        Client.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for Client
+         * @function getTypeUrl
+         * @memberof tab.Client
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        Client.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/tab.Client";
+        };
+
+        return Client;
+    })();
+
     return tab;
 })();
 

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"notification/internal/entity"
-	"notification/internal/usecase"
+	"aio/internal/entity"
+	"aio/internal/usecase"
 	"testing"
 )
 

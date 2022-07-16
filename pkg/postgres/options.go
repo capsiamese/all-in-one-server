@@ -1,6 +1,6 @@
 package postgres
 
-import "notification/pkg/rdb"
+import "aio/pkg/rdb"
 
 type Option func(postgres *Postgres)
 

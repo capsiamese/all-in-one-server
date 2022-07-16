@@ -3,7 +3,7 @@
 package group
 
 import (
-	"notification/ent/predicate"
+	"aio/ent/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

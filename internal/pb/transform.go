@@ -1,8 +1,8 @@
 package pb
 
 import (
+	"aio/ent"
 	"google.golang.org/protobuf/encoding/prototext"
-	"notification/ent"
 )
 
 func ClientToPB(ec *ent.ExtensionClient) *Client {

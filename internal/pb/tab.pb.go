@@ -304,6 +304,85 @@ func (x *Client) GetGroups() []*Group {
 	return nil
 }
 
+type BarkHistory struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   int64             `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Ts   int64             `protobuf:"varint,2,opt,name=ts,proto3" json:"ts,omitempty"`
+	From string            `protobuf:"bytes,3,opt,name=from,proto3" json:"from,omitempty"`
+	Key  string            `protobuf:"bytes,4,opt,name=key,proto3" json:"key,omitempty"`
+	Data map[string]string `protobuf:"bytes,5,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (x *BarkHistory) Reset() {
+	*x = BarkHistory{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tab_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BarkHistory) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BarkHistory) ProtoMessage() {}
+
+func (x *BarkHistory) ProtoReflect() protoreflect.Message {
+	mi := &file_tab_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BarkHistory.ProtoReflect.Descriptor instead.
+func (*BarkHistory) Descriptor() ([]byte, []int) {
+	return file_tab_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *BarkHistory) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *BarkHistory) GetTs() int64 {
+	if x != nil {
+		return x.Ts
+	}
+	return 0
+}
+
+func (x *BarkHistory) GetFrom() string {
+	if x != nil {
+		return x.From
+	}
+	return ""
+}
+
+func (x *BarkHistory) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *BarkHistory) GetData() map[string]string {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
 var File_tab_proto protoreflect.FileDescriptor
 
 var file_tab_proto_rawDesc = []byte{
@@ -335,8 +414,20 @@ var file_tab_proto_rawDesc = []byte{
 	0x28, 0x03, 0x52, 0x0e, 0x6c, 0x61, 0x73, 0x74, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x69,
 	0x6d, 0x65, 0x12, 0x22, 0x0a, 0x06, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x18, 0x05, 0x20, 0x03,
 	0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x74, 0x61, 0x62, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x52, 0x06,
-	0x67, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x42, 0x0d, 0x5a, 0x0b, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e,
-	0x61, 0x6c, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x67, 0x72, 0x6f, 0x75, 0x70, 0x73, 0x22, 0xbc, 0x01, 0x0a, 0x0b, 0x42, 0x61, 0x72, 0x6b, 0x48,
+	0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x74, 0x73, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x02, 0x74, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x66, 0x72, 0x6f, 0x6d, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x66, 0x72, 0x6f, 0x6d, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65,
+	0x79, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x2e, 0x0a, 0x04,
+	0x64, 0x61, 0x74, 0x61, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x74, 0x61, 0x62,
+	0x2e, 0x42, 0x61, 0x72, 0x6b, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x2e, 0x44, 0x61, 0x74,
+	0x61, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x37, 0x0a, 0x09,
+	0x44, 0x61, 0x74, 0x61, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75,
+	0x65, 0x3a, 0x02, 0x38, 0x01, 0x42, 0x0d, 0x5a, 0x0b, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61,
+	0x6c, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -351,22 +442,25 @@ func file_tab_proto_rawDescGZIP() []byte {
 	return file_tab_proto_rawDescData
 }
 
-var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_tab_proto_goTypes = []interface{}{
 	(*Tab)(nil),         // 0: tab.Tab
 	(*GroupOption)(nil), // 1: tab.GroupOption
 	(*Group)(nil),       // 2: tab.Group
 	(*Client)(nil),      // 3: tab.Client
+	(*BarkHistory)(nil), // 4: tab.BarkHistory
+	nil,                 // 5: tab.BarkHistory.DataEntry
 }
 var file_tab_proto_depIdxs = []int32{
 	1, // 0: tab.Group.option:type_name -> tab.GroupOption
 	0, // 1: tab.Group.tabs:type_name -> tab.Tab
 	2, // 2: tab.Client.groups:type_name -> tab.Group
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	5, // 3: tab.BarkHistory.data:type_name -> tab.BarkHistory.DataEntry
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_tab_proto_init() }
@@ -423,6 +517,18 @@ func file_tab_proto_init() {
 				return nil
 			}
 		}
+		file_tab_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BarkHistory); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -430,7 +536,7 @@ func file_tab_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_tab_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

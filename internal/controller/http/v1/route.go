@@ -5,9 +5,9 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
-	"notification/docs"
-	"notification/internal/usecase"
-	"notification/pkg/logger"
+	"aio/docs"
+	"aio/internal/usecase"
+	"aio/pkg/logger"
 )
 
 type UseCase struct {

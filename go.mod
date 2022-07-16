@@ -1,4 +1,4 @@
-module notification
+module aio
 
 go 1.18
 

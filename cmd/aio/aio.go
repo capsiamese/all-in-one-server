@@ -1,10 +1,10 @@
 package main
 
 import (
+	"aio/config"
+	"aio/internal/app"
 	"github.com/urfave/cli/v2"
 	"log"
-	"notification/config"
-	"notification/internal/app"
 	"os"
 	"time"
 )

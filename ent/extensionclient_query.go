@@ -3,14 +3,14 @@
 package ent
 
 import (
+	"aio/ent/extensionclient"
+	"aio/ent/group"
+	"aio/ent/predicate"
 	"context"
 	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
-	"notification/ent/extensionclient"
-	"notification/ent/group"
-	"notification/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

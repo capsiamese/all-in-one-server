@@ -1,10 +1,10 @@
 package v1
 
 import (
+	"aio/internal/usecase"
+	"aio/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"notification/internal/usecase"
-	"notification/pkg/logger"
 )
 
 type pushDeerRoutes struct {

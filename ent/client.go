@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log"
 
-	"notification/ent/migrate"
+	"aio/ent/migrate"
 
-	"notification/ent/extensionclient"
-	"notification/ent/group"
-	"notification/ent/tab"
+	"aio/ent/extensionclient"
+	"aio/ent/group"
+	"aio/ent/tab"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

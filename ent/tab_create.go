@@ -3,11 +3,11 @@
 package ent
 
 import (
+	"aio/ent/group"
+	"aio/ent/tab"
 	"context"
 	"errors"
 	"fmt"
-	"notification/ent/group"
-	"notification/ent/tab"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

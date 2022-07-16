@@ -1,13 +1,13 @@
 package usecase
 
 import (
+	"aio/internal/entity"
+	"aio/pkg/logger"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	uuid "github.com/satori/go.uuid"
-	"notification/internal/entity"
-	"notification/pkg/logger"
 )
 
 var _ Bark = (*BarkUseCase)(nil)

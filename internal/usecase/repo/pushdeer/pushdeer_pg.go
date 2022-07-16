@@ -1,14 +1,14 @@
 package pushdeer
 
 import (
+	"aio/internal/entity"
+	"aio/internal/usecase"
+	"aio/pkg/logger"
+	"aio/pkg/postgres"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/Masterminds/squirrel"
-	"notification/internal/entity"
-	"notification/internal/usecase"
-	"notification/pkg/logger"
-	"notification/pkg/postgres"
 	"strconv"
 	"time"
 )

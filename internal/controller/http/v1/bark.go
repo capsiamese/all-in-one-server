@@ -1,10 +1,10 @@
 package v1
 
 import (
+	"aio/internal/entity"
+	"aio/internal/usecase"
+	"aio/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"notification/internal/entity"
-	"notification/internal/usecase"
-	"notification/pkg/logger"
 	"time"
 )
 
@@ -73,7 +73,7 @@ func (r *barkRoutes) register(c *gin.Context) {
 func (r *barkRoutes) push(c *gin.Context) {
 	key := c.Param("key")
 
-	m := make(map[string]interface{})
+	m := make(map[string]string)
 	for k, v := range c.Request.URL.Query() {
 		if len(v) != 0 {
 			m[k] = v[0]

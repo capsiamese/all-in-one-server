@@ -3,8 +3,8 @@
 package ent
 
 import (
-	"notification/ent/extensionclient"
-	"notification/ent/schema"
+	"aio/ent/extensionclient"
+	"aio/ent/schema"
 )
 
 // The init function reads all schema descriptors with runtime code

@@ -1,16 +1,16 @@
 package bark
 
 import (
+	"aio/internal/entity"
+	"aio/internal/usecase"
+	"aio/pkg/logger"
+	"aio/pkg/postgres"
 	"bytes"
 	"context"
 	"encoding/gob"
 	"errors"
 	"fmt"
 	"github.com/Masterminds/squirrel"
-	"notification/internal/entity"
-	"notification/internal/usecase"
-	"notification/pkg/logger"
-	"notification/pkg/postgres"
 	"time"
 )
 

@@ -1,11 +1,11 @@
 package v1
 
 import (
+	"aio/internal/pb"
+	"aio/internal/usecase"
+	"aio/pkg/logger"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
-	"notification/internal/pb"
-	"notification/internal/usecase"
-	"notification/pkg/logger"
 )
 
 type extensionRoutes struct {

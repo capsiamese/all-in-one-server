@@ -7,9 +7,9 @@ package usecase_test
 import (
 	context "context"
 	http "net/http"
-	ent "notification/ent"
-	entity "notification/internal/entity"
-	pb "notification/internal/pb"
+	ent "aio/ent"
+	entity "aio/internal/entity"
+	pb "aio/internal/pb"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

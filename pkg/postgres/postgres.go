@@ -1,13 +1,13 @@
 package postgres
 
 import (
+	"aio/pkg/rdb"
 	"context"
 	"errors"
 	"github.com/Masterminds/squirrel"
 	"github.com/go-redis/cache/v8"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"notification/pkg/rdb"
 )
 
 type Postgres struct {

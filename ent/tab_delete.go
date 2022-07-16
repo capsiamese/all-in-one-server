@@ -3,10 +3,10 @@
 package ent
 
 import (
+	"aio/ent/predicate"
+	"aio/ent/tab"
 	"context"
 	"fmt"
-	"notification/ent/predicate"
-	"notification/ent/tab"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

@@ -3,10 +3,10 @@
 package enttest
 
 import (
+	"aio/ent"
 	"context"
-	"notification/ent"
 	// required by schema hooks.
-	_ "notification/ent/runtime"
+	_ "aio/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

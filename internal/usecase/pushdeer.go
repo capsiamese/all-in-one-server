@@ -6,8 +6,8 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	uuid "github.com/satori/go.uuid"
 	"net/http"
-	"notification/internal/entity"
-	"notification/pkg/wsManager"
+	"aio/internal/entity"
+	"aio/pkg/wsManager"
 	"strconv"
 	"time"
 )
