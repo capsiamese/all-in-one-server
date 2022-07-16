@@ -4,4 +4,4 @@ http:
 log:
   level: debug
 
-dumb: true
+dumb: false

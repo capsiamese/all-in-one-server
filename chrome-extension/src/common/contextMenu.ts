@@ -53,7 +53,7 @@ handler[BarkSender] = (info: OnClickData, tab: Tab | undefined) => {
     if (!u) {
         return
     }
-    PushToDefault({url: u,});
+    PushToDefault({url: u, title: tab?.title, content: "from sw"});
 }
 
 handler[TabStoreThis] = (info: OnClickData, tab: Tab | undefined) => {
