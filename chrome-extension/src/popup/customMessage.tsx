@@ -18,7 +18,8 @@ export default function CustomMessage() {
             return
         }
         PushToDefault({
-            body: text,
+            content: text,
+            title: "custom message",
         });
     }
 

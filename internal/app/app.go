@@ -64,6 +64,9 @@ func Run(cfg *config.Config) error {
 	if err != nil {
 		return err
 	}
+	if cfg.Dumb {
+		barkApns = webapi.NewDumbBark(l)
+	}
 	pdApns, err := webapi.NewPushDeerAPNs(l)
 	if err != nil {
 		return err

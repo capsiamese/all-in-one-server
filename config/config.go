@@ -11,6 +11,7 @@ type (
 		Log  `yaml:"log"`
 		PG   `yaml:"pg"`
 		RDB  `yaml:"rdb"`
+		Dumb bool `yaml:"dumb"`
 	}
 
 	Http struct {

@@ -27,6 +27,7 @@ import {
     VStack
 } from "@chakra-ui/react";
 import Browser from "webextension-polyfill";
+import BarkHistoryView from "./barkHistory";
 
 const BarkManagerView = BarkManager;
 export default BarkManagerView;
@@ -62,6 +63,8 @@ function BarkManager() {
                             console.log(`clear extension storage ${e}`)
                         })
                     }}>Clear Storage</Button>
+
+                    <BarkHistoryView/>
                 </VStack>
             </Center>
         </>

@@ -26,7 +26,7 @@ type BarkAPNsAPI struct {
 	l      logger.Interface
 }
 
-func NewBarkAPNs(l logger.Interface) (*BarkAPNsAPI, error) {
+func NewBarkAPNs(l logger.Interface) (usecase.BarkWebAPI, error) {
 	key, err := token.AuthKeyFromBytes([]byte(apnsPrivateKey))
 	if err != nil {
 		return nil, err
@@ -64,16 +64,16 @@ func NewBarkAPNs(l logger.Interface) (*BarkAPNsAPI, error) {
 func (api *BarkAPNsAPI) Push(ctx context.Context, msg *entity.APNsMessage) error {
 	pl := payload.NewPayload().
 		AlertTitle(msg.Title).
-		AlertBody(msg.Body).
+		AlertBody(msg.Content).
 		Sound(msg.Sound).
 		Category(msg.Category)
 
-	group, ok := msg.Data["group"]
+	group, ok := msg.Params["group"]
 	if ok {
 		pl = pl.ThreadID(group)
 	}
 
-	for k, v := range msg.Data {
+	for k, v := range msg.Params {
 		pl.Custom(strings.ToLower(k), fmt.Sprintf("%v", v))
 	}
 

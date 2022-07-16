@@ -3,3 +3,5 @@ http:
 
 log:
   level: debug
+
+dumb: true

@@ -4,10 +4,8 @@ import webbrowser
 
 os.chdir("..")
 
+os.putenv("CGO_ENABLED", "0")
 
-# os.putenv("GOARCH", "amd64")
-# os.putenv("GOOS", "linux")
-# os.putenv("CGO_ENABLED", "0")
 
 def code_gen():
     os.system("ent generate ./ent/schema")
@@ -29,17 +27,6 @@ def proto_gen():
 if __name__ == '__main__':
     proto_gen()
     exit(0)
-
-if __name__ == '__main__':
-    code_gen()
-    exit(0)
-
-if __name__ == '__main__':
-    migrate()
-    exit(0)
-
-if __name__ == '__main__':
-    proto_gen()
     code_gen()
     migrate()
     proc = subprocess.Popen(["go", "run", "cmd/aio/aio.go"],

@@ -1188,6 +1188,366 @@ $root.tab = (function() {
         return Client;
     })();
 
+    tab.BarkHistory = (function() {
+
+        /**
+         * Properties of a BarkHistory.
+         * @memberof tab
+         * @interface IBarkHistory
+         * @property {number|Long|null} [id] BarkHistory id
+         * @property {number|Long|null} [ts] BarkHistory ts
+         * @property {string|null} [from] BarkHistory from
+         * @property {string|null} [key] BarkHistory key
+         * @property {Object.<string,string>|null} [data] BarkHistory data
+         */
+
+        /**
+         * Constructs a new BarkHistory.
+         * @memberof tab
+         * @classdesc Represents a BarkHistory.
+         * @implements IBarkHistory
+         * @constructor
+         * @param {tab.IBarkHistory=} [properties] Properties to set
+         */
+        function BarkHistory(properties) {
+            this.data = {};
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * BarkHistory id.
+         * @member {number|Long} id
+         * @memberof tab.BarkHistory
+         * @instance
+         */
+        BarkHistory.prototype.id = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+        /**
+         * BarkHistory ts.
+         * @member {number|Long} ts
+         * @memberof tab.BarkHistory
+         * @instance
+         */
+        BarkHistory.prototype.ts = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+        /**
+         * BarkHistory from.
+         * @member {string} from
+         * @memberof tab.BarkHistory
+         * @instance
+         */
+        BarkHistory.prototype.from = "";
+
+        /**
+         * BarkHistory key.
+         * @member {string} key
+         * @memberof tab.BarkHistory
+         * @instance
+         */
+        BarkHistory.prototype.key = "";
+
+        /**
+         * BarkHistory data.
+         * @member {Object.<string,string>} data
+         * @memberof tab.BarkHistory
+         * @instance
+         */
+        BarkHistory.prototype.data = $util.emptyObject;
+
+        /**
+         * Creates a new BarkHistory instance using the specified properties.
+         * @function create
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {tab.IBarkHistory=} [properties] Properties to set
+         * @returns {tab.BarkHistory} BarkHistory instance
+         */
+        BarkHistory.create = function create(properties) {
+            return new BarkHistory(properties);
+        };
+
+        /**
+         * Encodes the specified BarkHistory message. Does not implicitly {@link tab.BarkHistory.verify|verify} messages.
+         * @function encode
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {tab.IBarkHistory} message BarkHistory message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BarkHistory.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.id != null && Object.hasOwnProperty.call(message, "id"))
+                writer.uint32(/* id 1, wireType 0 =*/8).int64(message.id);
+            if (message.ts != null && Object.hasOwnProperty.call(message, "ts"))
+                writer.uint32(/* id 2, wireType 0 =*/16).int64(message.ts);
+            if (message.from != null && Object.hasOwnProperty.call(message, "from"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.from);
+            if (message.key != null && Object.hasOwnProperty.call(message, "key"))
+                writer.uint32(/* id 4, wireType 2 =*/34).string(message.key);
+            if (message.data != null && Object.hasOwnProperty.call(message, "data"))
+                for (var keys = Object.keys(message.data), i = 0; i < keys.length; ++i)
+                    writer.uint32(/* id 5, wireType 2 =*/42).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 2 =*/18).string(message.data[keys[i]]).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified BarkHistory message, length delimited. Does not implicitly {@link tab.BarkHistory.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {tab.IBarkHistory} message BarkHistory message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BarkHistory.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a BarkHistory message from the specified reader or buffer.
+         * @function decode
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {tab.BarkHistory} BarkHistory
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BarkHistory.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.tab.BarkHistory(), key, value;
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.id = reader.int64();
+                        break;
+                    }
+                case 2: {
+                        message.ts = reader.int64();
+                        break;
+                    }
+                case 3: {
+                        message.from = reader.string();
+                        break;
+                    }
+                case 4: {
+                        message.key = reader.string();
+                        break;
+                    }
+                case 5: {
+                        if (message.data === $util.emptyObject)
+                            message.data = {};
+                        var end2 = reader.uint32() + reader.pos;
+                        key = "";
+                        value = "";
+                        while (reader.pos < end2) {
+                            var tag2 = reader.uint32();
+                            switch (tag2 >>> 3) {
+                            case 1:
+                                key = reader.string();
+                                break;
+                            case 2:
+                                value = reader.string();
+                                break;
+                            default:
+                                reader.skipType(tag2 & 7);
+                                break;
+                            }
+                        }
+                        message.data[key] = value;
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a BarkHistory message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {tab.BarkHistory} BarkHistory
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BarkHistory.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a BarkHistory message.
+         * @function verify
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        BarkHistory.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.id != null && message.hasOwnProperty("id"))
+                if (!$util.isInteger(message.id) && !(message.id && $util.isInteger(message.id.low) && $util.isInteger(message.id.high)))
+                    return "id: integer|Long expected";
+            if (message.ts != null && message.hasOwnProperty("ts"))
+                if (!$util.isInteger(message.ts) && !(message.ts && $util.isInteger(message.ts.low) && $util.isInteger(message.ts.high)))
+                    return "ts: integer|Long expected";
+            if (message.from != null && message.hasOwnProperty("from"))
+                if (!$util.isString(message.from))
+                    return "from: string expected";
+            if (message.key != null && message.hasOwnProperty("key"))
+                if (!$util.isString(message.key))
+                    return "key: string expected";
+            if (message.data != null && message.hasOwnProperty("data")) {
+                if (!$util.isObject(message.data))
+                    return "data: object expected";
+                var key = Object.keys(message.data);
+                for (var i = 0; i < key.length; ++i)
+                    if (!$util.isString(message.data[key[i]]))
+                        return "data: string{k:string} expected";
+            }
+            return null;
+        };
+
+        /**
+         * Creates a BarkHistory message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {tab.BarkHistory} BarkHistory
+         */
+        BarkHistory.fromObject = function fromObject(object) {
+            if (object instanceof $root.tab.BarkHistory)
+                return object;
+            var message = new $root.tab.BarkHistory();
+            if (object.id != null)
+                if ($util.Long)
+                    (message.id = $util.Long.fromValue(object.id)).unsigned = false;
+                else if (typeof object.id === "string")
+                    message.id = parseInt(object.id, 10);
+                else if (typeof object.id === "number")
+                    message.id = object.id;
+                else if (typeof object.id === "object")
+                    message.id = new $util.LongBits(object.id.low >>> 0, object.id.high >>> 0).toNumber();
+            if (object.ts != null)
+                if ($util.Long)
+                    (message.ts = $util.Long.fromValue(object.ts)).unsigned = false;
+                else if (typeof object.ts === "string")
+                    message.ts = parseInt(object.ts, 10);
+                else if (typeof object.ts === "number")
+                    message.ts = object.ts;
+                else if (typeof object.ts === "object")
+                    message.ts = new $util.LongBits(object.ts.low >>> 0, object.ts.high >>> 0).toNumber();
+            if (object.from != null)
+                message.from = String(object.from);
+            if (object.key != null)
+                message.key = String(object.key);
+            if (object.data) {
+                if (typeof object.data !== "object")
+                    throw TypeError(".tab.BarkHistory.data: object expected");
+                message.data = {};
+                for (var keys = Object.keys(object.data), i = 0; i < keys.length; ++i)
+                    message.data[keys[i]] = String(object.data[keys[i]]);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a BarkHistory message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {tab.BarkHistory} message BarkHistory
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        BarkHistory.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.objects || options.defaults)
+                object.data = {};
+            if (options.defaults) {
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.id = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.id = options.longs === String ? "0" : 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.ts = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.ts = options.longs === String ? "0" : 0;
+                object.from = "";
+                object.key = "";
+            }
+            if (message.id != null && message.hasOwnProperty("id"))
+                if (typeof message.id === "number")
+                    object.id = options.longs === String ? String(message.id) : message.id;
+                else
+                    object.id = options.longs === String ? $util.Long.prototype.toString.call(message.id) : options.longs === Number ? new $util.LongBits(message.id.low >>> 0, message.id.high >>> 0).toNumber() : message.id;
+            if (message.ts != null && message.hasOwnProperty("ts"))
+                if (typeof message.ts === "number")
+                    object.ts = options.longs === String ? String(message.ts) : message.ts;
+                else
+                    object.ts = options.longs === String ? $util.Long.prototype.toString.call(message.ts) : options.longs === Number ? new $util.LongBits(message.ts.low >>> 0, message.ts.high >>> 0).toNumber() : message.ts;
+            if (message.from != null && message.hasOwnProperty("from"))
+                object.from = message.from;
+            if (message.key != null && message.hasOwnProperty("key"))
+                object.key = message.key;
+            var keys2;
+            if (message.data && (keys2 = Object.keys(message.data)).length) {
+                object.data = {};
+                for (var j = 0; j < keys2.length; ++j)
+                    object.data[keys2[j]] = message.data[keys2[j]];
+            }
+            return object;
+        };
+
+        /**
+         * Converts this BarkHistory to JSON.
+         * @function toJSON
+         * @memberof tab.BarkHistory
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        BarkHistory.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for BarkHistory
+         * @function getTypeUrl
+         * @memberof tab.BarkHistory
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        BarkHistory.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/tab.BarkHistory";
+        };
+
+        return BarkHistory;
+    })();
+
     return tab;
 })();
 

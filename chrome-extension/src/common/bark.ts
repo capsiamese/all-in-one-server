@@ -1,11 +1,15 @@
 import Browser, {Storage} from "webextension-polyfill";
+import {tab} from "../pb/compiled";
 import StorageAreaOnChangedChangesType = Storage.StorageAreaOnChangedChangesType;
-
+import BarkHistory = tab.BarkHistory;
 
 class Bark {
     static DefaultDevice = "default_bark_device";
     static DeviceList = "bark_device_list";
 }
+
+const DeviceList = Bark.DeviceList
+const TargetDevice = Bark.DefaultDevice
 
 export interface Device {
     name: string;
@@ -14,7 +18,7 @@ export interface Device {
 
 export interface BarkMessage {
     title?: string;
-    body?: string;
+    content?: string;
     url?: string;
 }
 
@@ -91,9 +95,14 @@ function Push(msg: BarkMessage, device: Device) {
     if (!name || !target) {
         return
     }
-    let {title, body, url} = msg;
+    let {title, content, url} = msg;
     console.log("push", msg, "to", device);
     try {
+        if (target[target.length - 1] == '/') {
+            target += "place_holder"
+        } else {
+            target += "/place_holder"
+        }
         fetch(target, {
             method: "POST",
             headers: {
@@ -101,9 +110,9 @@ function Push(msg: BarkMessage, device: Device) {
             },
             body: JSON.stringify({
                 'title': title,
-                'body': body,
+                'content': content,
                 'ext_params': {
-                    'badge': 1,
+                    'badge': "1",
                     'icon': 'none:url',
                     'group': 'none',
                     'url': url,
@@ -119,6 +128,16 @@ function Push(msg: BarkMessage, device: Device) {
     }
 }
 
+async function PullHistory(target: string, offset: number, limit: number): Promise<BarkHistory> {
+    let params = new URLSearchParams({
+        "limit": limit.toString(),
+        "offset": offset.toString(),
+    })
+    return fetch(`${target}?${params}`, {
+        method: "GET",
+    }).then(res => res.json())
+}
+
 export {
     GetDefaultDevice,
     SetDefaultDevice,
@@ -130,4 +149,7 @@ export {
 
     Push,
     PushToDefault,
+    PullHistory,
+    DeviceList,
+    TargetDevice,
 }

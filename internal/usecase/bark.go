@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"aio/internal/entity"
+	"aio/internal/pb"
 	"aio/pkg/logger"
 	"context"
 	"database/sql"
@@ -47,13 +48,20 @@ func (uc *BarkUseCase) Register(ctx context.Context, device *entity.BarkDevice) 
 	if device.DeviceKey != "" {
 		obj, err := uc.repo.Get(ctx, &entity.BarkDevice{DeviceKey: device.DeviceKey})
 		if err != nil {
-			return err
+			if errors.Is(err, sql.ErrNoRows) {
+				// device custom key
+				return uc.repo.Store(ctx, device)
+			} else {
+				return err
+			}
 		}
+		// old token equal new token
 		if obj.DeviceToken == device.DeviceToken {
 			return nil
 		}
 	}
 
+	// generate a new key for this device
 	obj, err := uc.repo.Get(ctx, &entity.BarkDevice{DeviceToken: device.DeviceToken})
 	if errors.Is(err, sql.ErrNoRows) {
 		device.DeviceKey = uuid.NewV4().String()
@@ -66,7 +74,7 @@ func (uc *BarkUseCase) Register(ctx context.Context, device *entity.BarkDevice) 
 	return nil
 }
 
-func (uc *BarkUseCase) Pull(ctx context.Context, key string, offset, limit int) ([]*entity.BarkHistory, error) {
+func (uc *BarkUseCase) Pull(ctx context.Context, key string, offset, limit int) ([]*pb.BarkHistory, error) {
 	d, err := uc.repo.Get(ctx, &entity.BarkDevice{DeviceKey: key})
 	if err != nil {
 		return nil, err

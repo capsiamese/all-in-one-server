@@ -36,5 +36,7 @@ message BarkHistory {
   int64 ts = 2;
   string from = 3;
   string key = 4;
-  map<string, string> data = 5;
+  string title = 5;
+  string content = 6;
+  map<string, string> params = 7;
 }

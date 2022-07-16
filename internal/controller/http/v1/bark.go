@@ -4,7 +4,9 @@ import (
 	"aio/internal/entity"
 	"aio/internal/usecase"
 	"aio/pkg/logger"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gin-gonic/gin"
+	"strings"
 	"time"
 )
 
@@ -20,6 +22,7 @@ func newBarkRouter(g *gin.RouterGroup, l logger.Interface, b usecase.Bark) {
 	e.GET("/health", r.health)
 	e.GET("/info", r.info)
 	e.GET("/register", r.register)
+	e.POST("/:key/:content", r.push)
 	e.GET("/:key/:content", r.push)
 	e.GET("/:key", r.pull)
 }
@@ -50,7 +53,7 @@ func (r *barkRoutes) info(c *gin.Context) {
 func (r *barkRoutes) register(c *gin.Context) {
 	token := c.Query("devicetoken")
 	key := c.Query("key")
-	name := c.DefaultQuery("name", "none")
+	name := c.DefaultQuery("name", gofakeit.PetName())
 
 	ent := &entity.BarkDevice{
 		DeviceToken: token,
@@ -72,20 +75,26 @@ func (r *barkRoutes) register(c *gin.Context) {
 
 func (r *barkRoutes) push(c *gin.Context) {
 	key := c.Param("key")
-
-	m := make(map[string]string)
-	for k, v := range c.Request.URL.Query() {
-		if len(v) != 0 {
-			m[k] = v[0]
+	var msg = &entity.APNsMessage{}
+	if strings.HasPrefix(c.ContentType(), gin.MIMEJSON) {
+		err := c.ShouldBindJSON(msg)
+		if err != nil {
+			r.l.Errorln("push bark message", err)
+			barkResp(c, 400, "internal error", nil)
+			return
 		}
-	}
-
-	msg := &entity.APNsMessage{
-		Title:    c.Query("title"),
-		Category: c.Query("category"),
-		Body:     c.Param("content"),
-		Sound:    c.DefaultQuery("sound", "1107"),
-		Data:     m,
+	} else {
+		m := make(map[string]string)
+		for k, v := range c.Request.URL.Query() {
+			if len(v) != 0 {
+				m[k] = v[0]
+			}
+		}
+		msg.Title = c.Query("title")
+		msg.Category = c.Query("category")
+		msg.Content = c.Param("content")
+		msg.Sound = c.DefaultQuery("sound", "1107")
+		msg.Params = m
 	}
 
 	err := r.b.Push(c.Request.Context(), key, msg)
@@ -99,11 +108,19 @@ func (r *barkRoutes) push(c *gin.Context) {
 
 func (r *barkRoutes) pull(c *gin.Context) {
 	key := c.Param("key")
-	list, err := r.b.Pull(nil, key, 0, 100)
+	params := new(entity.HistoryParam)
+	if err := c.ShouldBindQuery(params); err != nil {
+		r.l.Errorln("fetch bark history", err)
+		barkResp(c, 400, "internal error", nil)
+		return
+	}
+
+	list, err := r.b.Pull(c.Request.Context(), key, params.Offset, params.Limit)
 	if err != nil {
 		r.l.Errorln("fetch bark history", err)
 		barkResp(c, 400, "internal error", nil)
 		return
 	}
+	r.l.Debugln(list)
 	barkResp(c, 200, "success", list)
 }

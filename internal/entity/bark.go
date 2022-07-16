@@ -6,15 +6,6 @@ type BarkDevice struct {
 	Name        string `db:"name"`
 }
 
-type BarkHistory struct {
-	Id          int64          `db:"id"`
-	DeviceKey   string         `db:"device_key"`
-	DeviceToken string         `db:"device_token"`
-	Data        map[string]any `db:"data"`
-	Ts          int64          `db:"ts"`
-	From        string         `db:"send_from"`
-}
-
 type RegInfo struct {
 	Token    string `form:"token" validate:"uuid4"`
 	Name     string `form:"name" validate:"required"`
@@ -25,9 +16,14 @@ type RegInfo struct {
 
 type APNsMessage struct {
 	DeviceToken string
-	Category    string
-	Title       string
-	Body        string
-	Sound       string
-	Data        map[string]string
+	Category    string            `json:"category"`
+	Title       string            `json:"title"`
+	Content     string            `json:"content"` // Title, message, clipBoard
+	Sound       string            `json:"sound"`
+	Params      map[string]string `json:"ext_params"` // url
+}
+
+type HistoryParam struct {
+	Offset int `json:"offset" form:"offset"`
+	Limit  int `json:"limit" form:"limit"`
 }
