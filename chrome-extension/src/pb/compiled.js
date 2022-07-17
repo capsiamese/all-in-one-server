@@ -1198,7 +1198,9 @@ $root.tab = (function() {
          * @property {number|Long|null} [ts] BarkHistory ts
          * @property {string|null} [from] BarkHistory from
          * @property {string|null} [key] BarkHistory key
-         * @property {Object.<string,string>|null} [data] BarkHistory data
+         * @property {string|null} [title] BarkHistory title
+         * @property {string|null} [content] BarkHistory content
+         * @property {Object.<string,string>|null} [params] BarkHistory params
          */
 
         /**
@@ -1210,7 +1212,7 @@ $root.tab = (function() {
          * @param {tab.IBarkHistory=} [properties] Properties to set
          */
         function BarkHistory(properties) {
-            this.data = {};
+            this.params = {};
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -1250,12 +1252,28 @@ $root.tab = (function() {
         BarkHistory.prototype.key = "";
 
         /**
-         * BarkHistory data.
-         * @member {Object.<string,string>} data
+         * BarkHistory title.
+         * @member {string} title
          * @memberof tab.BarkHistory
          * @instance
          */
-        BarkHistory.prototype.data = $util.emptyObject;
+        BarkHistory.prototype.title = "";
+
+        /**
+         * BarkHistory content.
+         * @member {string} content
+         * @memberof tab.BarkHistory
+         * @instance
+         */
+        BarkHistory.prototype.content = "";
+
+        /**
+         * BarkHistory params.
+         * @member {Object.<string,string>} params
+         * @memberof tab.BarkHistory
+         * @instance
+         */
+        BarkHistory.prototype.params = $util.emptyObject;
 
         /**
          * Creates a new BarkHistory instance using the specified properties.
@@ -1289,9 +1307,13 @@ $root.tab = (function() {
                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.from);
             if (message.key != null && Object.hasOwnProperty.call(message, "key"))
                 writer.uint32(/* id 4, wireType 2 =*/34).string(message.key);
-            if (message.data != null && Object.hasOwnProperty.call(message, "data"))
-                for (var keys = Object.keys(message.data), i = 0; i < keys.length; ++i)
-                    writer.uint32(/* id 5, wireType 2 =*/42).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 2 =*/18).string(message.data[keys[i]]).ldelim();
+            if (message.title != null && Object.hasOwnProperty.call(message, "title"))
+                writer.uint32(/* id 5, wireType 2 =*/42).string(message.title);
+            if (message.content != null && Object.hasOwnProperty.call(message, "content"))
+                writer.uint32(/* id 6, wireType 2 =*/50).string(message.content);
+            if (message.params != null && Object.hasOwnProperty.call(message, "params"))
+                for (var keys = Object.keys(message.params), i = 0; i < keys.length; ++i)
+                    writer.uint32(/* id 7, wireType 2 =*/58).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 2 =*/18).string(message.params[keys[i]]).ldelim();
             return writer;
         };
 
@@ -1343,8 +1365,16 @@ $root.tab = (function() {
                         break;
                     }
                 case 5: {
-                        if (message.data === $util.emptyObject)
-                            message.data = {};
+                        message.title = reader.string();
+                        break;
+                    }
+                case 6: {
+                        message.content = reader.string();
+                        break;
+                    }
+                case 7: {
+                        if (message.params === $util.emptyObject)
+                            message.params = {};
                         var end2 = reader.uint32() + reader.pos;
                         key = "";
                         value = "";
@@ -1362,7 +1392,7 @@ $root.tab = (function() {
                                 break;
                             }
                         }
-                        message.data[key] = value;
+                        message.params[key] = value;
                         break;
                     }
                 default:
@@ -1412,13 +1442,19 @@ $root.tab = (function() {
             if (message.key != null && message.hasOwnProperty("key"))
                 if (!$util.isString(message.key))
                     return "key: string expected";
-            if (message.data != null && message.hasOwnProperty("data")) {
-                if (!$util.isObject(message.data))
-                    return "data: object expected";
-                var key = Object.keys(message.data);
+            if (message.title != null && message.hasOwnProperty("title"))
+                if (!$util.isString(message.title))
+                    return "title: string expected";
+            if (message.content != null && message.hasOwnProperty("content"))
+                if (!$util.isString(message.content))
+                    return "content: string expected";
+            if (message.params != null && message.hasOwnProperty("params")) {
+                if (!$util.isObject(message.params))
+                    return "params: object expected";
+                var key = Object.keys(message.params);
                 for (var i = 0; i < key.length; ++i)
-                    if (!$util.isString(message.data[key[i]]))
-                        return "data: string{k:string} expected";
+                    if (!$util.isString(message.params[key[i]]))
+                        return "params: string{k:string} expected";
             }
             return null;
         };
@@ -1457,12 +1493,16 @@ $root.tab = (function() {
                 message.from = String(object.from);
             if (object.key != null)
                 message.key = String(object.key);
-            if (object.data) {
-                if (typeof object.data !== "object")
-                    throw TypeError(".tab.BarkHistory.data: object expected");
-                message.data = {};
-                for (var keys = Object.keys(object.data), i = 0; i < keys.length; ++i)
-                    message.data[keys[i]] = String(object.data[keys[i]]);
+            if (object.title != null)
+                message.title = String(object.title);
+            if (object.content != null)
+                message.content = String(object.content);
+            if (object.params) {
+                if (typeof object.params !== "object")
+                    throw TypeError(".tab.BarkHistory.params: object expected");
+                message.params = {};
+                for (var keys = Object.keys(object.params), i = 0; i < keys.length; ++i)
+                    message.params[keys[i]] = String(object.params[keys[i]]);
             }
             return message;
         };
@@ -1481,7 +1521,7 @@ $root.tab = (function() {
                 options = {};
             var object = {};
             if (options.objects || options.defaults)
-                object.data = {};
+                object.params = {};
             if (options.defaults) {
                 if ($util.Long) {
                     var long = new $util.Long(0, 0, false);
@@ -1495,6 +1535,8 @@ $root.tab = (function() {
                     object.ts = options.longs === String ? "0" : 0;
                 object.from = "";
                 object.key = "";
+                object.title = "";
+                object.content = "";
             }
             if (message.id != null && message.hasOwnProperty("id"))
                 if (typeof message.id === "number")
@@ -1510,11 +1552,15 @@ $root.tab = (function() {
                 object.from = message.from;
             if (message.key != null && message.hasOwnProperty("key"))
                 object.key = message.key;
+            if (message.title != null && message.hasOwnProperty("title"))
+                object.title = message.title;
+            if (message.content != null && message.hasOwnProperty("content"))
+                object.content = message.content;
             var keys2;
-            if (message.data && (keys2 = Object.keys(message.data)).length) {
-                object.data = {};
+            if (message.params && (keys2 = Object.keys(message.params)).length) {
+                object.params = {};
                 for (var j = 0; j < keys2.length; ++j)
-                    object.data[keys2[j]] = message.data[keys2[j]];
+                    object.params[keys2[j]] = message.params[keys2[j]];
             }
             return object;
         };

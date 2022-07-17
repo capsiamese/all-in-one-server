@@ -17,6 +17,7 @@ type (
 		Push(context.Context, string, *entity.APNsMessage) error
 		Register(context.Context, *entity.BarkDevice) error
 		Pull(ctx context.Context, key string, offset, limit int) ([]*pb.BarkHistory, error)
+		DropHistory(ctx context.Context, key string, id int64) error
 	}
 
 	BarkRepo interface {
@@ -24,6 +25,7 @@ type (
 		Get(context.Context, *entity.BarkDevice) (*entity.BarkDevice, error)
 		SaveMessage(ctx context.Context, device *entity.BarkDevice, message *entity.APNsMessage) error
 		FetchHistory(ctx context.Context, device *entity.BarkDevice, offset, limit int) ([]*pb.BarkHistory, error)
+		DropHistory(ctx context.Context, key string, id int64) error
 	}
 
 	BarkWebAPI interface {

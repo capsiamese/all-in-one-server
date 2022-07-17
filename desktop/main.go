@@ -20,6 +20,7 @@ func init() {
 }
 
 func main() {
+
 	cnt := 0
 	a := app.New()
 	w := a.NewWindow("AIO")

@@ -81,3 +81,7 @@ func (uc *BarkUseCase) Pull(ctx context.Context, key string, offset, limit int) 
 	}
 	return uc.repo.FetchHistory(ctx, d, offset, limit)
 }
+
+func (uc *BarkUseCase) DropHistory(ctx context.Context, key string, id int64) error {
+	return uc.repo.DropHistory(ctx, key, id)
+}

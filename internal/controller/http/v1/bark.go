@@ -6,6 +6,7 @@ import (
 	"aio/pkg/logger"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -25,6 +26,7 @@ func newBarkRouter(g *gin.RouterGroup, l logger.Interface, b usecase.Bark) {
 	e.POST("/:key/:content", r.push)
 	e.GET("/:key/:content", r.push)
 	e.GET("/:key", r.pull)
+	e.DELETE("/:key/history/:id", r.dropHistory)
 }
 
 func (r *barkRoutes) ping(c *gin.Context) {
@@ -123,4 +125,22 @@ func (r *barkRoutes) pull(c *gin.Context) {
 	}
 	r.l.Debugln(list)
 	barkResp(c, 200, "success", list)
+}
+
+func (r *barkRoutes) dropHistory(c *gin.Context) {
+	key := c.Param("key")
+	hid := c.Param("id")
+	id, err := strconv.ParseInt(hid, 10, 64)
+	if err != nil {
+		r.l.Errorln("parse history id", err)
+		barkResp(c, 400, "internal error", nil)
+		return
+	}
+	err = r.b.DropHistory(c.Request.Context(), key, id)
+	if err != nil {
+		r.l.Errorln("drop history", err)
+		barkResp(c, 400, "internal error", nil)
+		return
+	}
+	barkResp(c, 200, "success", nil)
 }

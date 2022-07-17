@@ -152,3 +152,23 @@ func (r *Repo) FetchHistory(ctx context.Context, device *entity.BarkDevice, offs
 	}
 	return list, nil
 }
+
+func (r *Repo) DropHistory(ctx context.Context, key string, id int64) error {
+	q, p, err := r.p.Builder.
+		Delete(HistoryTable).
+		Where(squirrel.Eq{"device_key": key, "id": id}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	res, err := r.p.X.ExecContext(ctx, q, p...)
+	if err != nil {
+		return err
+	}
+	if i, err := res.RowsAffected(); err != nil {
+		r.l.Warningf("drop history key:%s id:%d %w", key, id, err)
+	} else if i != 1 {
+		r.l.Infoln("drop history id:%d not exist", id)
+	}
+	return nil
+}

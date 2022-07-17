@@ -1,5 +1,6 @@
 import Browser, {Storage} from "webextension-polyfill";
 import {tab} from "../pb/compiled";
+import _ from "lodash";
 import StorageAreaOnChangedChangesType = Storage.StorageAreaOnChangedChangesType;
 import BarkHistory = tab.BarkHistory;
 
@@ -128,14 +129,37 @@ function Push(msg: BarkMessage, device: Device) {
     }
 }
 
-async function PullHistory(target: string, offset: number, limit: number): Promise<BarkHistory> {
+async function PullHistory(target: string, offset: number, limit: number): Promise<BarkHistory[]> {
     let params = new URLSearchParams({
         "limit": limit.toString(),
         "offset": offset.toString(),
     })
-    return fetch(`${target}?${params}`, {
-        method: "GET",
+    return new Promise<BarkHistory[]>((resolve, reject) => {
+        target = _.trimEnd(target, "/")
+        fetch(`${target}?${params}`, {
+            method: "GET",
+        }).then(res => res.json()).then(data => {
+            if (data.code != 200) {
+                reject(data)
+            }
+            resolve(data.data ?? [])
+        })
+    })
+}
+
+async function DropHistory(target: string, id: number) {
+    target = EndWithAppend(target, "/", `history/${id}`)
+    return fetch(target, {
+        method: "DELETE"
     }).then(res => res.json())
+}
+
+function EndWithAppend(str: string, end: string, append: string): string {
+    if (_.endsWith(str, end)) {
+        return str + append
+    } else {
+        return str + end + append
+    }
 }
 
 export {
@@ -150,6 +174,7 @@ export {
     Push,
     PushToDefault,
     PullHistory,
+    DropHistory,
     DeviceList,
     TargetDevice,
 }

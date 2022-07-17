@@ -477,8 +477,14 @@ export namespace tab {
         /** BarkHistory key */
         key?: (string|null);
 
-        /** BarkHistory data */
-        data?: ({ [k: string]: string }|null);
+        /** BarkHistory title */
+        title?: (string|null);
+
+        /** BarkHistory content */
+        content?: (string|null);
+
+        /** BarkHistory params */
+        params?: ({ [k: string]: string }|null);
     }
 
     /** Represents a BarkHistory. */
@@ -502,8 +508,14 @@ export namespace tab {
         /** BarkHistory key. */
         public key: string;
 
-        /** BarkHistory data. */
-        public data: { [k: string]: string };
+        /** BarkHistory title. */
+        public title: string;
+
+        /** BarkHistory content. */
+        public content: string;
+
+        /** BarkHistory params. */
+        public params: { [k: string]: string };
 
         /**
          * Creates a new BarkHistory instance using the specified properties.
