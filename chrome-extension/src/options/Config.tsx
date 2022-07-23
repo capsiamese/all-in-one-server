@@ -1,44 +1,46 @@
 import {Box, Button, ButtonGroup, Input, InputGroup, InputLeftAddon, Stack} from "@chakra-ui/react";
 import {ChangeEvent, useEffect, useState} from "react";
 import Store from "../common/storage";
-import Browser from "webextension-polyfill";
 import _ from "lodash";
+import {PullTabs, Register} from "../common/webRequest";
+import {ConfigStore} from "../common/storageKey";
 import {tab} from "../pb/compiled";
-import ServerMSG, {CodeSuccess} from "../common/toastMessage";
+import ClientConfig = tab.ClientConfig;
+
 
 export default function ConfigView() {
     const [addr, setAddr] = useState('');
     const [name, setName] = useState('');
     const [uid, setUid] = useState('');
 
-    const uidStore = new Store<string>('client_uid', '')
-    const clientName = new Store<string>('client_name', '')
-    const serverURL = new Store<string>('server_url', '')
+    const configStore = new Store<ClientConfig>(ConfigStore, new ClientConfig({name: "", url: "", uid: ""}))
 
     useEffect(() => {
-        uidStore.get().then(setUid)
-        clientName.get().then(setName)
-        serverURL.get().then(setAddr)
+        configStore.get().then(res => {
+            setUid(res.uid)
+            setName(res.name)
+            setAddr(res.url)
+        })
     }, [])
 
     const handlePing = () => {
         setAddr(_.trimEnd(addr, '/'))
-        register(addr, name).then(msg => {
-            if (msg.code != CodeSuccess) {
+        Register(addr, name).then(msg => {
+            if (msg.code != 0) {
                 alert(msg.error)
                 return
             }
             setUid(msg.data.uid)
-            uidStore.set(msg.data.uid).then()
-            clientName.set(name).then()
-            serverURL.set(addr).then()
+            configStore.set(new ClientConfig({
+                name, url: addr, uid: msg.data.uid,
+            })).then()
             console.log(msg);
         })
     }
 
     const handlePull = () => {
         PullTabs(addr, uid).then(data => {
-            if (data.code != CodeSuccess) {
+            if (data.code != 0) {
                 alert(data.error)
                 return
             }
@@ -77,19 +79,4 @@ export default function ConfigView() {
             </ButtonGroup>
         </>
     )
-}
-
-async function register(addr: string, name: string): Promise<ServerMSG> {
-    let id = Browser.runtime.id
-    return fetch(`${addr}/register?name=${name}&extension=${id}`, {
-        method: "POST"
-    }).then(res => res.json())
-}
-
-async function PullTabs(addr: string, uid: string): Promise<ServerMSG> {
-    let t = new tab.Tab({name: "hello"})
-    console.log(t)
-    return fetch(`${addr}/${uid}/group`, {
-        method: "GEt"
-    }).then(res => res.json())
 }

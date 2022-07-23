@@ -22,6 +22,7 @@ import BarkHistoryView from "./barkHistory";
 import Store from "../common/storage";
 import {BarkDefaultDevice, BarkDeviceList} from "../common/storageKey";
 import {tab} from "../pb/compiled";
+import {AddDevice, DropDevice, EditDevice, PullDevice} from "../common/bark";
 import BarkDevice = tab.BarkDevice;
 import IBarkDevice = tab.IBarkDevice;
 
@@ -63,6 +64,9 @@ function DeviceStack() {
     useEffect(() => {
         defaultDeviceStore.addListener(setDefaultDevice);
         deviceListStore.addListener(setDeviceList);
+        PullDevice().then(data => {
+            //deviceListStore.set()
+        })
     }, []);
 
     const handleChangeDevice = (newDevice: string) => {
@@ -80,7 +84,9 @@ function DeviceStack() {
         if (old.name == device?.name) {
             defaultDeviceStore.set(item).then();
         }
-        deviceListStore.set(deviceList).then();
+        deviceListStore.set(deviceList).then(() => {
+            EditDevice(old, item).then()
+        });
     }
 
     const handleRemoveDevice = (deviceName: string) => {
@@ -90,8 +96,11 @@ function DeviceStack() {
         let idx = deviceList.findIndex(d => {
             return d.name == deviceName
         })
+        let del = deviceList[idx]
         deviceList.splice(idx, 1)
-        deviceListStore.set(deviceList).then()
+        deviceListStore.set(deviceList).then(() => {
+            DropDevice(del).then()
+        })
     }
 
     const [newName, setNewName] = useState('');
@@ -107,14 +116,17 @@ function DeviceStack() {
                 return
             }
         }
-        deviceList.push(new BarkDevice({
+        let newDevice = new BarkDevice({
             name: newName,
             url: newTarget,
-        }));
-        deviceListStore.set(deviceList).then(() => {
-            setNewName('');
-            setNewTarget('');
-        });
+        })
+        AddDevice(newDevice).then(d => {
+            deviceList.push(d);
+            deviceListStore.set(deviceList).then(() => {
+                setNewName('');
+                setNewTarget('');
+            });
+        })
     }
 
     return (

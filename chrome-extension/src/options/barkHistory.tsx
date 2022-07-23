@@ -32,6 +32,10 @@ export default function BarkHistoryView() {
         }).catch(off)
     }
 
+    const handleDrop = () => {
+        //DropHistory()
+    }
+
     const clearHistoryCache = () => {
         cache.set([]).then()
     }

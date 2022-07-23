@@ -53,3 +53,9 @@ message BarkMessage {
   string content = 2;
   string url = 3;
 }
+
+message ClientConfig {
+  string name = 1;
+  string uid = 2;
+  string url = 3;
+}

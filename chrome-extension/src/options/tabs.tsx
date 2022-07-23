@@ -3,8 +3,9 @@ import Store from "../common/storage";
 import {DragDropContext, Draggable, Droppable, DropResult} from "react-beautiful-dnd";
 import {Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box} from "@chakra-ui/react";
 import {tab} from "../pb/compiled";
+import {TabStore} from "../common/storageKey";
+import {PullTabGroup} from "../common/tabStore";
 import IGroup = tab.IGroup;
-import ITab = tab.ITab;
 import Group = tab.Group;
 import Tab = tab.Tab;
 
@@ -13,10 +14,11 @@ export default TabView;
 
 function TabManager() {
     const [groups, setGroups] = useState<IGroup[]>([]);
-    const s = new Store<ITab[]>('tab-store');
+    const s = new Store<IGroup[]>(TabStore);
     useEffect(() => {
         s.get().then(setGroups);
         s.addListener(setGroups);
+        PullTabGroup().then()
     }, []);
 
     const onDragEnd = (result: DropResult) => {

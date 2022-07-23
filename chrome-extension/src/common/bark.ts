@@ -1,12 +1,15 @@
 import {tab} from "../pb/compiled";
 import _ from "lodash";
 import Store from "./storage";
-import {BarkDefaultDevice} from "./storageKey";
+import {BarkDefaultDevice, ConfigStore} from "./storageKey";
+import CommonResponse from "./webRequest";
 import IBarkMessage = tab.IBarkMessage;
 import IBarkDevice = tab.IBarkDevice;
 import IBarkHistory = tab.IBarkHistory;
+import BarkDevice = tab.BarkDevice;
+import ClientConfig = tab.ClientConfig;
 
-async function Push(msg: IBarkMessage, device?: IBarkDevice) {
+export async function Push(msg: IBarkMessage, device?: IBarkDevice) {
     if (!device) {
         const ds = new Store<IBarkDevice>(BarkDefaultDevice)
         device = await ds.get()
@@ -44,7 +47,7 @@ async function Push(msg: IBarkMessage, device?: IBarkDevice) {
     }
 }
 
-async function PullHistory(target: string, offset: number, limit: number): Promise<IBarkHistory[]> {
+export async function PullHistory(target: string, offset: number, limit: number): Promise<IBarkHistory[]> {
     let params = new URLSearchParams({
         "limit": limit.toString(),
         "offset": offset.toString(),
@@ -62,11 +65,50 @@ async function PullHistory(target: string, offset: number, limit: number): Promi
     })
 }
 
-async function DropHistory(target: string, id: number) {
+export async function DropHistory(target: string, id: number) {
     target = EndWithAppend(target, "/", `history/${id}`)
     return fetch(target, {
         method: "DELETE"
     }).then(res => res.json())
+}
+
+export async function AddDevice(device: BarkDevice): Promise<BarkDevice> {
+    const conf = new Store<ClientConfig>(ConfigStore)
+    let host = await conf.get()
+    if (!host) {
+        device.id = 1; //TODO: get device list len
+        return device
+    }
+    let params = new URLSearchParams({})
+    return fetch(EndWithAppend(host.url, "/", `?${params}`), {
+        method: "POST"
+    }).then(res => res.json()).then((rsp: CommonResponse) => {
+        device.id = rsp.data.id
+        return device
+    })
+}
+
+export async function DropDevice(device: BarkDevice) {
+    const conf = new Store<ClientConfig>(ConfigStore)
+    let host = await conf.get()
+    if (!host) {
+        return
+    }
+    let params = new URLSearchParams({})
+    return fetch(EndWithAppend(host.url, "/", `?${params}`), {
+        method: "DELETE"
+    }).then(res => res.json())
+}
+
+export async function PullDevice(): Promise<BarkDevice[]> {
+    const conf = new Store<ClientConfig>(ConfigStore)
+    let host = await conf.get()
+    return fetch(EndWithAppend(host.url, "/", host.uid), {
+        method: "GET"
+    }).then(res => res.json())
+}
+
+export async function EditDevice(old: BarkDevice, later: BarkDevice) {
 }
 
 function EndWithAppend(str: string, end: string, append: string): string {
@@ -75,10 +117,4 @@ function EndWithAppend(str: string, end: string, append: string): string {
     } else {
         return str + end + append
     }
-}
-
-export {
-    Push,
-    PullHistory,
-    DropHistory,
 }
