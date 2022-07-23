@@ -1,10 +1,10 @@
 import {Box, Button, ButtonGroup, Input, InputGroup, InputLeftAddon, Stack} from "@chakra-ui/react";
 import {ChangeEvent, useEffect, useState} from "react";
-import ServerMSG, {CodeSuccess} from "../common/serverMessage"
 import Store from "../common/storage";
 import Browser from "webextension-polyfill";
 import _ from "lodash";
 import {tab} from "../pb/compiled";
+import ServerMSG, {CodeSuccess} from "../common/toastMessage";
 
 export default function ConfigView() {
     const [addr, setAddr] = useState('');

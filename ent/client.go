@@ -9,6 +9,7 @@ import (
 
 	"aio/ent/migrate"
 
+	"aio/ent/barkaddress"
 	"aio/ent/extensionclient"
 	"aio/ent/group"
 	"aio/ent/tab"
@@ -23,6 +24,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// BarkAddress is the client for interacting with the BarkAddress builders.
+	BarkAddress *BarkAddressClient
 	// ExtensionClient is the client for interacting with the ExtensionClient builders.
 	ExtensionClient *ExtensionClientClient
 	// Group is the client for interacting with the Group builders.
@@ -42,6 +45,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.BarkAddress = NewBarkAddressClient(c.config)
 	c.ExtensionClient = NewExtensionClientClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.Tab = NewTabClient(c.config)
@@ -78,6 +82,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:             ctx,
 		config:          cfg,
+		BarkAddress:     NewBarkAddressClient(cfg),
 		ExtensionClient: NewExtensionClientClient(cfg),
 		Group:           NewGroupClient(cfg),
 		Tab:             NewTabClient(cfg),
@@ -100,6 +105,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:             ctx,
 		config:          cfg,
+		BarkAddress:     NewBarkAddressClient(cfg),
 		ExtensionClient: NewExtensionClientClient(cfg),
 		Group:           NewGroupClient(cfg),
 		Tab:             NewTabClient(cfg),
@@ -109,7 +115,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		ExtensionClient.
+//		BarkAddress.
 //		Query().
 //		Count(ctx)
 //
@@ -132,9 +138,116 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.BarkAddress.Use(hooks...)
 	c.ExtensionClient.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.Tab.Use(hooks...)
+}
+
+// BarkAddressClient is a client for the BarkAddress schema.
+type BarkAddressClient struct {
+	config
+}
+
+// NewBarkAddressClient returns a client for the BarkAddress from the given config.
+func NewBarkAddressClient(c config) *BarkAddressClient {
+	return &BarkAddressClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `barkaddress.Hooks(f(g(h())))`.
+func (c *BarkAddressClient) Use(hooks ...Hook) {
+	c.hooks.BarkAddress = append(c.hooks.BarkAddress, hooks...)
+}
+
+// Create returns a create builder for BarkAddress.
+func (c *BarkAddressClient) Create() *BarkAddressCreate {
+	mutation := newBarkAddressMutation(c.config, OpCreate)
+	return &BarkAddressCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BarkAddress entities.
+func (c *BarkAddressClient) CreateBulk(builders ...*BarkAddressCreate) *BarkAddressCreateBulk {
+	return &BarkAddressCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BarkAddress.
+func (c *BarkAddressClient) Update() *BarkAddressUpdate {
+	mutation := newBarkAddressMutation(c.config, OpUpdate)
+	return &BarkAddressUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BarkAddressClient) UpdateOne(ba *BarkAddress) *BarkAddressUpdateOne {
+	mutation := newBarkAddressMutation(c.config, OpUpdateOne, withBarkAddress(ba))
+	return &BarkAddressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BarkAddressClient) UpdateOneID(id int) *BarkAddressUpdateOne {
+	mutation := newBarkAddressMutation(c.config, OpUpdateOne, withBarkAddressID(id))
+	return &BarkAddressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BarkAddress.
+func (c *BarkAddressClient) Delete() *BarkAddressDelete {
+	mutation := newBarkAddressMutation(c.config, OpDelete)
+	return &BarkAddressDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *BarkAddressClient) DeleteOne(ba *BarkAddress) *BarkAddressDeleteOne {
+	return c.DeleteOneID(ba.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *BarkAddressClient) DeleteOneID(id int) *BarkAddressDeleteOne {
+	builder := c.Delete().Where(barkaddress.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BarkAddressDeleteOne{builder}
+}
+
+// Query returns a query builder for BarkAddress.
+func (c *BarkAddressClient) Query() *BarkAddressQuery {
+	return &BarkAddressQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a BarkAddress entity by its id.
+func (c *BarkAddressClient) Get(ctx context.Context, id int) (*BarkAddress, error) {
+	return c.Query().Where(barkaddress.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BarkAddressClient) GetX(ctx context.Context, id int) *BarkAddress {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryClient queries the client edge of a BarkAddress.
+func (c *BarkAddressClient) QueryClient(ba *BarkAddress) *ExtensionClientQuery {
+	query := &ExtensionClientQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ba.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(barkaddress.Table, barkaddress.FieldID, id),
+			sqlgraph.To(extensionclient.Table, extensionclient.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, barkaddress.ClientTable, barkaddress.ClientPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ba.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BarkAddressClient) Hooks() []Hook {
+	return c.hooks.BarkAddress
 }
 
 // ExtensionClientClient is a client for the ExtensionClient schema.
@@ -231,6 +344,22 @@ func (c *ExtensionClientClient) QueryGroups(ec *ExtensionClient) *GroupQuery {
 			sqlgraph.From(extensionclient.Table, extensionclient.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, extensionclient.GroupsTable, extensionclient.GroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ec.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAddresses queries the addresses edge of a ExtensionClient.
+func (c *ExtensionClientClient) QueryAddresses(ec *ExtensionClient) *BarkAddressQuery {
+	query := &BarkAddressQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ec.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(extensionclient.Table, extensionclient.FieldID, id),
+			sqlgraph.To(barkaddress.Table, barkaddress.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, extensionclient.AddressesTable, extensionclient.AddressesPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(ec.driver.Dialect(), step)
 		return fromV, nil

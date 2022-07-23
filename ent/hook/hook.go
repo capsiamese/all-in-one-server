@@ -8,6 +8,19 @@ import (
 	"fmt"
 )
 
+// The BarkAddressFunc type is an adapter to allow the use of ordinary
+// function as BarkAddress mutator.
+type BarkAddressFunc func(context.Context, *ent.BarkAddressMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BarkAddressFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.BarkAddressMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BarkAddressMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ExtensionClientFunc type is an adapter to allow the use of ordinary
 // function as ExtensionClient mutator.
 type ExtensionClientFunc func(context.Context, *ent.ExtensionClientMutation) (ent.Value, error)

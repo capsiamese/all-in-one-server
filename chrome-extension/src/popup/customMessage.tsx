@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {Box, Button, Collapse, Flex, IconButton, Textarea, VStack} from "@chakra-ui/react";
 import autosize from "autosize";
-import {PushToDefault} from "../common/bark";
+import {Push} from "../common/bark";
 import {ArrowForwardIcon, SmallCloseIcon} from "@chakra-ui/icons";
 
 export default function CustomMessage() {
@@ -17,10 +17,10 @@ export default function CustomMessage() {
         if (text.length == 0) {
             return
         }
-        PushToDefault({
+        Push({
             content: text,
             title: "custom message",
-        });
+        }).then();
     }
 
     return (

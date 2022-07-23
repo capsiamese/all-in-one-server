@@ -542,6 +542,7 @@ $root.tab = (function() {
          * @property {string|null} [name] Group name
          * @property {string|null} [uid] Group uid
          * @property {number|null} [index] Group index
+         * @property {number|Long|null} [ts] Group ts
          * @property {tab.IGroupOption|null} [option] Group option
          * @property {Array.<tab.ITab>|null} [tabs] Group tabs
          */
@@ -585,6 +586,14 @@ $root.tab = (function() {
          * @instance
          */
         Group.prototype.index = 0;
+
+        /**
+         * Group ts.
+         * @member {number|Long} ts
+         * @memberof tab.Group
+         * @instance
+         */
+        Group.prototype.ts = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
 
         /**
          * Group option.
@@ -632,11 +641,13 @@ $root.tab = (function() {
                 writer.uint32(/* id 2, wireType 2 =*/18).string(message.uid);
             if (message.index != null && Object.hasOwnProperty.call(message, "index"))
                 writer.uint32(/* id 3, wireType 0 =*/24).int32(message.index);
+            if (message.ts != null && Object.hasOwnProperty.call(message, "ts"))
+                writer.uint32(/* id 4, wireType 0 =*/32).int64(message.ts);
             if (message.option != null && Object.hasOwnProperty.call(message, "option"))
-                $root.tab.GroupOption.encode(message.option, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+                $root.tab.GroupOption.encode(message.option, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
             if (message.tabs != null && message.tabs.length)
                 for (var i = 0; i < message.tabs.length; ++i)
-                    $root.tab.Tab.encode(message.tabs[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+                    $root.tab.Tab.encode(message.tabs[i], writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
             return writer;
         };
 
@@ -684,10 +695,14 @@ $root.tab = (function() {
                         break;
                     }
                 case 4: {
-                        message.option = $root.tab.GroupOption.decode(reader, reader.uint32());
+                        message.ts = reader.int64();
                         break;
                     }
                 case 5: {
+                        message.option = $root.tab.GroupOption.decode(reader, reader.uint32());
+                        break;
+                    }
+                case 6: {
                         if (!(message.tabs && message.tabs.length))
                             message.tabs = [];
                         message.tabs.push($root.tab.Tab.decode(reader, reader.uint32()));
@@ -737,6 +752,9 @@ $root.tab = (function() {
             if (message.index != null && message.hasOwnProperty("index"))
                 if (!$util.isInteger(message.index))
                     return "index: integer expected";
+            if (message.ts != null && message.hasOwnProperty("ts"))
+                if (!$util.isInteger(message.ts) && !(message.ts && $util.isInteger(message.ts.low) && $util.isInteger(message.ts.high)))
+                    return "ts: integer|Long expected";
             if (message.option != null && message.hasOwnProperty("option")) {
                 var error = $root.tab.GroupOption.verify(message.option);
                 if (error)
@@ -772,6 +790,15 @@ $root.tab = (function() {
                 message.uid = String(object.uid);
             if (object.index != null)
                 message.index = object.index | 0;
+            if (object.ts != null)
+                if ($util.Long)
+                    (message.ts = $util.Long.fromValue(object.ts)).unsigned = false;
+                else if (typeof object.ts === "string")
+                    message.ts = parseInt(object.ts, 10);
+                else if (typeof object.ts === "number")
+                    message.ts = object.ts;
+                else if (typeof object.ts === "object")
+                    message.ts = new $util.LongBits(object.ts.low >>> 0, object.ts.high >>> 0).toNumber();
             if (object.option != null) {
                 if (typeof object.option !== "object")
                     throw TypeError(".tab.Group.option: object expected");
@@ -809,6 +836,11 @@ $root.tab = (function() {
                 object.name = "";
                 object.uid = "";
                 object.index = 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.ts = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.ts = options.longs === String ? "0" : 0;
                 object.option = null;
             }
             if (message.name != null && message.hasOwnProperty("name"))
@@ -817,6 +849,11 @@ $root.tab = (function() {
                 object.uid = message.uid;
             if (message.index != null && message.hasOwnProperty("index"))
                 object.index = message.index;
+            if (message.ts != null && message.hasOwnProperty("ts"))
+                if (typeof message.ts === "number")
+                    object.ts = options.longs === String ? String(message.ts) : message.ts;
+                else
+                    object.ts = options.longs === String ? $util.Long.prototype.toString.call(message.ts) : options.longs === Number ? new $util.LongBits(message.ts.low >>> 0, message.ts.high >>> 0).toNumber() : message.ts;
             if (message.option != null && message.hasOwnProperty("option"))
                 object.option = $root.tab.GroupOption.toObject(message.option, options);
             if (message.tabs && message.tabs.length) {
@@ -1592,6 +1629,520 @@ $root.tab = (function() {
         };
 
         return BarkHistory;
+    })();
+
+    tab.BarkDevice = (function() {
+
+        /**
+         * Properties of a BarkDevice.
+         * @memberof tab
+         * @interface IBarkDevice
+         * @property {number|Long|null} [id] BarkDevice id
+         * @property {string|null} [name] BarkDevice name
+         * @property {string|null} [url] BarkDevice url
+         */
+
+        /**
+         * Constructs a new BarkDevice.
+         * @memberof tab
+         * @classdesc Represents a BarkDevice.
+         * @implements IBarkDevice
+         * @constructor
+         * @param {tab.IBarkDevice=} [properties] Properties to set
+         */
+        function BarkDevice(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * BarkDevice id.
+         * @member {number|Long} id
+         * @memberof tab.BarkDevice
+         * @instance
+         */
+        BarkDevice.prototype.id = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+        /**
+         * BarkDevice name.
+         * @member {string} name
+         * @memberof tab.BarkDevice
+         * @instance
+         */
+        BarkDevice.prototype.name = "";
+
+        /**
+         * BarkDevice url.
+         * @member {string} url
+         * @memberof tab.BarkDevice
+         * @instance
+         */
+        BarkDevice.prototype.url = "";
+
+        /**
+         * Creates a new BarkDevice instance using the specified properties.
+         * @function create
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {tab.IBarkDevice=} [properties] Properties to set
+         * @returns {tab.BarkDevice} BarkDevice instance
+         */
+        BarkDevice.create = function create(properties) {
+            return new BarkDevice(properties);
+        };
+
+        /**
+         * Encodes the specified BarkDevice message. Does not implicitly {@link tab.BarkDevice.verify|verify} messages.
+         * @function encode
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {tab.IBarkDevice} message BarkDevice message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BarkDevice.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.id != null && Object.hasOwnProperty.call(message, "id"))
+                writer.uint32(/* id 1, wireType 0 =*/8).int64(message.id);
+            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.name);
+            if (message.url != null && Object.hasOwnProperty.call(message, "url"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.url);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified BarkDevice message, length delimited. Does not implicitly {@link tab.BarkDevice.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {tab.IBarkDevice} message BarkDevice message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BarkDevice.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a BarkDevice message from the specified reader or buffer.
+         * @function decode
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {tab.BarkDevice} BarkDevice
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BarkDevice.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.tab.BarkDevice();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.id = reader.int64();
+                        break;
+                    }
+                case 2: {
+                        message.name = reader.string();
+                        break;
+                    }
+                case 3: {
+                        message.url = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a BarkDevice message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {tab.BarkDevice} BarkDevice
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BarkDevice.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a BarkDevice message.
+         * @function verify
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        BarkDevice.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.id != null && message.hasOwnProperty("id"))
+                if (!$util.isInteger(message.id) && !(message.id && $util.isInteger(message.id.low) && $util.isInteger(message.id.high)))
+                    return "id: integer|Long expected";
+            if (message.name != null && message.hasOwnProperty("name"))
+                if (!$util.isString(message.name))
+                    return "name: string expected";
+            if (message.url != null && message.hasOwnProperty("url"))
+                if (!$util.isString(message.url))
+                    return "url: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a BarkDevice message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {tab.BarkDevice} BarkDevice
+         */
+        BarkDevice.fromObject = function fromObject(object) {
+            if (object instanceof $root.tab.BarkDevice)
+                return object;
+            var message = new $root.tab.BarkDevice();
+            if (object.id != null)
+                if ($util.Long)
+                    (message.id = $util.Long.fromValue(object.id)).unsigned = false;
+                else if (typeof object.id === "string")
+                    message.id = parseInt(object.id, 10);
+                else if (typeof object.id === "number")
+                    message.id = object.id;
+                else if (typeof object.id === "object")
+                    message.id = new $util.LongBits(object.id.low >>> 0, object.id.high >>> 0).toNumber();
+            if (object.name != null)
+                message.name = String(object.name);
+            if (object.url != null)
+                message.url = String(object.url);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a BarkDevice message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {tab.BarkDevice} message BarkDevice
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        BarkDevice.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.id = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.id = options.longs === String ? "0" : 0;
+                object.name = "";
+                object.url = "";
+            }
+            if (message.id != null && message.hasOwnProperty("id"))
+                if (typeof message.id === "number")
+                    object.id = options.longs === String ? String(message.id) : message.id;
+                else
+                    object.id = options.longs === String ? $util.Long.prototype.toString.call(message.id) : options.longs === Number ? new $util.LongBits(message.id.low >>> 0, message.id.high >>> 0).toNumber() : message.id;
+            if (message.name != null && message.hasOwnProperty("name"))
+                object.name = message.name;
+            if (message.url != null && message.hasOwnProperty("url"))
+                object.url = message.url;
+            return object;
+        };
+
+        /**
+         * Converts this BarkDevice to JSON.
+         * @function toJSON
+         * @memberof tab.BarkDevice
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        BarkDevice.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for BarkDevice
+         * @function getTypeUrl
+         * @memberof tab.BarkDevice
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        BarkDevice.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/tab.BarkDevice";
+        };
+
+        return BarkDevice;
+    })();
+
+    tab.BarkMessage = (function() {
+
+        /**
+         * Properties of a BarkMessage.
+         * @memberof tab
+         * @interface IBarkMessage
+         * @property {string|null} [title] BarkMessage title
+         * @property {string|null} [content] BarkMessage content
+         * @property {string|null} [url] BarkMessage url
+         */
+
+        /**
+         * Constructs a new BarkMessage.
+         * @memberof tab
+         * @classdesc Represents a BarkMessage.
+         * @implements IBarkMessage
+         * @constructor
+         * @param {tab.IBarkMessage=} [properties] Properties to set
+         */
+        function BarkMessage(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * BarkMessage title.
+         * @member {string} title
+         * @memberof tab.BarkMessage
+         * @instance
+         */
+        BarkMessage.prototype.title = "";
+
+        /**
+         * BarkMessage content.
+         * @member {string} content
+         * @memberof tab.BarkMessage
+         * @instance
+         */
+        BarkMessage.prototype.content = "";
+
+        /**
+         * BarkMessage url.
+         * @member {string} url
+         * @memberof tab.BarkMessage
+         * @instance
+         */
+        BarkMessage.prototype.url = "";
+
+        /**
+         * Creates a new BarkMessage instance using the specified properties.
+         * @function create
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {tab.IBarkMessage=} [properties] Properties to set
+         * @returns {tab.BarkMessage} BarkMessage instance
+         */
+        BarkMessage.create = function create(properties) {
+            return new BarkMessage(properties);
+        };
+
+        /**
+         * Encodes the specified BarkMessage message. Does not implicitly {@link tab.BarkMessage.verify|verify} messages.
+         * @function encode
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {tab.IBarkMessage} message BarkMessage message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BarkMessage.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.title != null && Object.hasOwnProperty.call(message, "title"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.title);
+            if (message.content != null && Object.hasOwnProperty.call(message, "content"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.content);
+            if (message.url != null && Object.hasOwnProperty.call(message, "url"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.url);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified BarkMessage message, length delimited. Does not implicitly {@link tab.BarkMessage.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {tab.IBarkMessage} message BarkMessage message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BarkMessage.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a BarkMessage message from the specified reader or buffer.
+         * @function decode
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {tab.BarkMessage} BarkMessage
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BarkMessage.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.tab.BarkMessage();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.title = reader.string();
+                        break;
+                    }
+                case 2: {
+                        message.content = reader.string();
+                        break;
+                    }
+                case 3: {
+                        message.url = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a BarkMessage message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {tab.BarkMessage} BarkMessage
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BarkMessage.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a BarkMessage message.
+         * @function verify
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        BarkMessage.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.title != null && message.hasOwnProperty("title"))
+                if (!$util.isString(message.title))
+                    return "title: string expected";
+            if (message.content != null && message.hasOwnProperty("content"))
+                if (!$util.isString(message.content))
+                    return "content: string expected";
+            if (message.url != null && message.hasOwnProperty("url"))
+                if (!$util.isString(message.url))
+                    return "url: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a BarkMessage message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {tab.BarkMessage} BarkMessage
+         */
+        BarkMessage.fromObject = function fromObject(object) {
+            if (object instanceof $root.tab.BarkMessage)
+                return object;
+            var message = new $root.tab.BarkMessage();
+            if (object.title != null)
+                message.title = String(object.title);
+            if (object.content != null)
+                message.content = String(object.content);
+            if (object.url != null)
+                message.url = String(object.url);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a BarkMessage message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {tab.BarkMessage} message BarkMessage
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        BarkMessage.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.title = "";
+                object.content = "";
+                object.url = "";
+            }
+            if (message.title != null && message.hasOwnProperty("title"))
+                object.title = message.title;
+            if (message.content != null && message.hasOwnProperty("content"))
+                object.content = message.content;
+            if (message.url != null && message.hasOwnProperty("url"))
+                object.url = message.url;
+            return object;
+        };
+
+        /**
+         * Converts this BarkMessage to JSON.
+         * @function toJSON
+         * @memberof tab.BarkMessage
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        BarkMessage.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for BarkMessage
+         * @function getTypeUrl
+         * @memberof tab.BarkMessage
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        BarkMessage.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/tab.BarkMessage";
+        };
+
+        return BarkMessage;
     })();
 
     return tab;

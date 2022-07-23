@@ -524,6 +524,34 @@ func HasGroupsWith(preds ...predicate.Group) predicate.ExtensionClient {
 	})
 }
 
+// HasAddresses applies the HasEdge predicate on the "addresses" edge.
+func HasAddresses() predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AddressesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, AddressesTable, AddressesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAddressesWith applies the HasEdge predicate on the "addresses" edge with a given conditions (other predicates).
+func HasAddressesWith(preds ...predicate.BarkAddress) predicate.ExtensionClient {
+	return predicate.ExtensionClient(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AddressesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, AddressesTable, AddressesPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.ExtensionClient) predicate.ExtensionClient {
 	return predicate.ExtensionClient(func(s *sql.Selector) {

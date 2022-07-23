@@ -24,6 +24,7 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
+	BarkAddress     []ent.Hook
 	ExtensionClient []ent.Hook
 	Group           []ent.Hook
 	Tab             []ent.Hook

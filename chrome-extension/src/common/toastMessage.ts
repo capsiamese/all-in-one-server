@@ -1,6 +1,22 @@
 import Browser, {Runtime} from "webextension-polyfill";
-import Message, {MessageType} from "./message";
 import MessageSender = Runtime.MessageSender;
+
+export default interface Message {
+    Type: MessageType
+    Data: any
+}
+
+export enum MessageType {
+    Toast,
+}
+
+export default interface ServerMSG {
+    code: number
+    error?: string
+    data?: any
+}
+
+export const CodeSuccess = 0
 
 export function SendToastMessage(message: any) {
     Browser.runtime.sendMessage({

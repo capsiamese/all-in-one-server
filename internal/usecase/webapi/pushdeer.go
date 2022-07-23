@@ -1,6 +1,7 @@
 package webapi
 
 import (
+	"aio/assets"
 	"aio/internal/entity"
 	"aio/internal/usecase"
 	"aio/pkg/logger"
@@ -22,7 +23,7 @@ type PushDeerAPNsAPI struct {
 }
 
 func NewPushDeerAPNs(l logger.Interface) (*PushDeerAPNsAPI, error) {
-	cert, err := certificate.FromP12File("assets/c.p12", pdKeyPassword)
+	cert, err := certificate.FromP12Bytes(assets.P12, pdKeyPassword)
 	if err != nil {
 		return nil, err
 	}

@@ -35,9 +35,11 @@ type ExtensionClient struct {
 type ExtensionClientEdges struct {
 	// Groups holds the value of the groups edge.
 	Groups []*Group `json:"groups,omitempty"`
+	// Addresses holds the value of the addresses edge.
+	Addresses []*BarkAddress `json:"addresses,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // GroupsOrErr returns the Groups value or an error if the edge
@@ -47,6 +49,15 @@ func (e ExtensionClientEdges) GroupsOrErr() ([]*Group, error) {
 		return e.Groups, nil
 	}
 	return nil, &NotLoadedError{edge: "groups"}
+}
+
+// AddressesOrErr returns the Addresses value or an error if the edge
+// was not loaded in eager-loading.
+func (e ExtensionClientEdges) AddressesOrErr() ([]*BarkAddress, error) {
+	if e.loadedTypes[1] {
+		return e.Addresses, nil
+	}
+	return nil, &NotLoadedError{edge: "addresses"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -115,6 +126,11 @@ func (ec *ExtensionClient) assignValues(columns []string, values []interface{}) 
 // QueryGroups queries the "groups" edge of the ExtensionClient entity.
 func (ec *ExtensionClient) QueryGroups() *GroupQuery {
 	return (&ExtensionClientClient{config: ec.config}).QueryGroups(ec)
+}
+
+// QueryAddresses queries the "addresses" edge of the ExtensionClient entity.
+func (ec *ExtensionClient) QueryAddresses() *BarkAddressQuery {
+	return (&ExtensionClientClient{config: ec.config}).QueryAddresses(ec)
 }
 
 // Update returns a builder for updating this ExtensionClient.

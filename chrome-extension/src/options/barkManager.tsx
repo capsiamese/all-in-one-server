@@ -1,14 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {
-    Device,
-    GetDefaultDevice,
-    GetDeviceList,
-    OnDefaultDeviceChange,
-    OnDeviceListChange,
-    SetDefaultDevice,
-    SetDeviceList
-} from "../common/bark";
-import {
     Button,
     ButtonGroup,
     Center,
@@ -28,36 +19,21 @@ import {
 } from "@chakra-ui/react";
 import Browser from "webextension-polyfill";
 import BarkHistoryView from "./barkHistory";
+import Store from "../common/storage";
+import {BarkDefaultDevice, BarkDeviceList} from "../common/storageKey";
+import {tab} from "../pb/compiled";
+import BarkDevice = tab.BarkDevice;
+import IBarkDevice = tab.IBarkDevice;
 
 const BarkManagerView = BarkManager;
 export default BarkManagerView;
 
-interface DeviceInfo {
-    device?: Device
-    deviceList: Device[]
-}
-
 function BarkManager() {
-    const [device, setDefaultDevice] = useState<Device>();
-    GetDefaultDevice().then(device => {
-        setDefaultDevice(device);
-    })
-
-    const [deviceList, setDeviceList] = useState<Device[]>([]);
-    GetDeviceList().then(list => {
-        setDeviceList(list ? list : []);
-    })
-
-    useEffect(() => {
-        OnDefaultDeviceChange(setDefaultDevice);
-        OnDeviceListChange(setDeviceList);
-    }, []);
-
     return (
         <>
             <Center>
                 <VStack>
-                    <DeviceStack deviceInfo={{device, deviceList}}/>
+                    <DeviceStack/>
                     <Button onClick={() => {
                         Browser.storage.local.clear().catch(e => {
                             console.log(`clear extension storage ${e}`)
@@ -71,25 +47,40 @@ function BarkManager() {
     )
 }
 
-function DeviceStack({deviceInfo}: {
-    deviceInfo: DeviceInfo,
-}) {
-    const {device, deviceList} = deviceInfo;
+function DeviceStack() {
+    const defaultDeviceStore = new Store<BarkDevice>(BarkDefaultDevice)
+    const [device, setDefaultDevice] = useState<BarkDevice>();
+    defaultDeviceStore.get().then(d => {
+        setDefaultDevice(d)
+    })
+
+    const deviceListStore = new Store<BarkDevice[]>(BarkDeviceList, [])
+    const [deviceList, setDeviceList] = useState<BarkDevice[]>([]);
+    deviceListStore.get().then(list => {
+        setDeviceList(list)
+    })
+
+    useEffect(() => {
+        defaultDeviceStore.addListener(setDefaultDevice);
+        deviceListStore.addListener(setDeviceList);
+    }, []);
+
     const handleChangeDevice = (newDevice: string) => {
         let newDefault = deviceList.find((d) => {
             return d.name == newDevice
         });
         if (newDefault) {
-            SetDefaultDevice(newDefault).then();
+            defaultDeviceStore.set(newDefault).then()
         }
     }
-    const editDevice = (idx: number, d: Device) => {
+    const editDevice = (idx: number, d: IBarkDevice) => {
+        let item = new BarkDevice(d);
         let old = deviceList[idx];
-        deviceList[idx] = d;
+        deviceList[idx] = item
         if (old.name == device?.name) {
-            SetDefaultDevice(d).then();
+            defaultDeviceStore.set(item).then();
         }
-        SetDeviceList(deviceList).then();
+        deviceListStore.set(deviceList).then();
     }
 
     const handleRemoveDevice = (deviceName: string) => {
@@ -100,7 +91,7 @@ function DeviceStack({deviceInfo}: {
             return d.name == deviceName
         })
         deviceList.splice(idx, 1)
-        SetDeviceList(deviceList).then()
+        deviceListStore.set(deviceList).then()
     }
 
     const [newName, setNewName] = useState('');
@@ -116,11 +107,11 @@ function DeviceStack({deviceInfo}: {
                 return
             }
         }
-        deviceList.push({
+        deviceList.push(new BarkDevice({
             name: newName,
-            target: newTarget,
-        });
-        SetDeviceList(deviceList).then(() => {
+            url: newTarget,
+        }));
+        deviceListStore.set(deviceList).then(() => {
             setNewName('');
             setNewTarget('');
         });
@@ -169,15 +160,15 @@ function DeviceStack({deviceInfo}: {
 
 function TbodyDeviceItem({idx, device, editDevice, setDefault, isDefault, remove}: {
     idx: number,
-    device: Device,
+    device: BarkDevice,
     isDefault: boolean,
-    editDevice: (idx: number, device: Device) => void,
+    editDevice: (idx: number, device: IBarkDevice) => void,
     setDefault: (name: string) => void
     remove: (name: string) => void
 }) {
     const [edit, setEdit] = useState(false);
     const [name, setN] = useState(device.name);
-    const [target, setT] = useState(device.target);
+    const [target, setT] = useState(device.url);
 
     return (
         <Tr>
@@ -188,7 +179,7 @@ function TbodyDeviceItem({idx, device, editDevice, setDefault, isDefault, remove
                 onEdit={() => setEdit(true)}
             />
             <EditableTableItem
-                defaultValue={device.target}
+                defaultValue={device.url}
                 onChange={setT}
                 onBlur={() => setEdit(false)}
                 onEdit={() => setEdit(true)}
@@ -197,7 +188,7 @@ function TbodyDeviceItem({idx, device, editDevice, setDefault, isDefault, remove
                 {edit ? (
                     <ButtonGroup>
                         <Button onClick={() => {
-                            editDevice(idx, {name, target})
+                            editDevice(idx, {name, url: target})
                             setEdit(false)
                         }}>Ok</Button>
                     </ButtonGroup>

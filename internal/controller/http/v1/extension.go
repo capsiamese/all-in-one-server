@@ -182,6 +182,45 @@ func (e *extensionRoutes) swapTab(c *gin.Context) {
 	//ExtResp()
 }
 
+func (e *extensionRoutes) addAddress(c *gin.Context) {
+	uid := uuid.FromStringOrNil(c.Param("uid"))
+	addr := &pb.BarkDevice{}
+	err := c.ShouldBind(addr)
+	if err != nil {
+
+	}
+	err = e.e.AddBarkAddress(c.Request.Context(), uid, addr)
+	if err != nil {
+
+	}
+}
+
+func (e *extensionRoutes) pullAddress(c *gin.Context) {
+	uid := uuid.FromStringOrNil(c.Param("uid"))
+	list, err := e.e.BarkAddresses(c.Request.Context(), uid)
+	if err != nil {
+
+	}
+	result := make([]*pb.BarkDevice, 0, len(list))
+	for _, v := range list {
+		result = append(result, pb.AddressToPB(v))
+	}
+	ExtResp(c, 200, 0, nil, result)
+}
+
+func (e *extensionRoutes) dropAddress(c *gin.Context) {
+	uid := uuid.FromStringOrNil(c.Param("uid"))
+	addr := &pb.BarkDevice{}
+	err := c.ShouldBind(addr)
+	if err != nil {
+
+	}
+	err = e.e.DropBarkAddress(c.Request.Context(), uid, addr)
+	if err != nil {
+
+	}
+}
+
 func (e *extensionRoutes) Connect(c *gin.Context) {
 	uid, err := uuid.FromString(c.Query("uid"))
 	if err != nil {

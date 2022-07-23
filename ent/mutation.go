@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"aio/ent/barkaddress"
 	"aio/ent/extensionclient"
 	"aio/ent/group"
 	"aio/ent/predicate"
@@ -26,10 +27,559 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeBarkAddress     = "BarkAddress"
 	TypeExtensionClient = "ExtensionClient"
 	TypeGroup           = "Group"
 	TypeTab             = "Tab"
 )
+
+// BarkAddressMutation represents an operation that mutates the BarkAddress nodes in the graph.
+type BarkAddressMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	target        *string
+	index         *int64
+	addindex      *int64
+	clearedFields map[string]struct{}
+	client        map[int]struct{}
+	removedclient map[int]struct{}
+	clearedclient bool
+	done          bool
+	oldValue      func(context.Context) (*BarkAddress, error)
+	predicates    []predicate.BarkAddress
+}
+
+var _ ent.Mutation = (*BarkAddressMutation)(nil)
+
+// barkaddressOption allows management of the mutation configuration using functional options.
+type barkaddressOption func(*BarkAddressMutation)
+
+// newBarkAddressMutation creates new mutation for the BarkAddress entity.
+func newBarkAddressMutation(c config, op Op, opts ...barkaddressOption) *BarkAddressMutation {
+	m := &BarkAddressMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBarkAddress,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBarkAddressID sets the ID field of the mutation.
+func withBarkAddressID(id int) barkaddressOption {
+	return func(m *BarkAddressMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BarkAddress
+		)
+		m.oldValue = func(ctx context.Context) (*BarkAddress, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BarkAddress.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBarkAddress sets the old BarkAddress of the mutation.
+func withBarkAddress(node *BarkAddress) barkaddressOption {
+	return func(m *BarkAddressMutation) {
+		m.oldValue = func(context.Context) (*BarkAddress, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BarkAddressMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BarkAddressMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BarkAddressMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BarkAddressMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BarkAddress.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *BarkAddressMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *BarkAddressMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the BarkAddress entity.
+// If the BarkAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BarkAddressMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *BarkAddressMutation) ResetName() {
+	m.name = nil
+}
+
+// SetTarget sets the "target" field.
+func (m *BarkAddressMutation) SetTarget(s string) {
+	m.target = &s
+}
+
+// Target returns the value of the "target" field in the mutation.
+func (m *BarkAddressMutation) Target() (r string, exists bool) {
+	v := m.target
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTarget returns the old "target" field's value of the BarkAddress entity.
+// If the BarkAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BarkAddressMutation) OldTarget(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTarget is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTarget requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTarget: %w", err)
+	}
+	return oldValue.Target, nil
+}
+
+// ResetTarget resets all changes to the "target" field.
+func (m *BarkAddressMutation) ResetTarget() {
+	m.target = nil
+}
+
+// SetIndex sets the "index" field.
+func (m *BarkAddressMutation) SetIndex(i int64) {
+	m.index = &i
+	m.addindex = nil
+}
+
+// Index returns the value of the "index" field in the mutation.
+func (m *BarkAddressMutation) Index() (r int64, exists bool) {
+	v := m.index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIndex returns the old "index" field's value of the BarkAddress entity.
+// If the BarkAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BarkAddressMutation) OldIndex(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIndex: %w", err)
+	}
+	return oldValue.Index, nil
+}
+
+// AddIndex adds i to the "index" field.
+func (m *BarkAddressMutation) AddIndex(i int64) {
+	if m.addindex != nil {
+		*m.addindex += i
+	} else {
+		m.addindex = &i
+	}
+}
+
+// AddedIndex returns the value that was added to the "index" field in this mutation.
+func (m *BarkAddressMutation) AddedIndex() (r int64, exists bool) {
+	v := m.addindex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetIndex resets all changes to the "index" field.
+func (m *BarkAddressMutation) ResetIndex() {
+	m.index = nil
+	m.addindex = nil
+}
+
+// AddClientIDs adds the "client" edge to the ExtensionClient entity by ids.
+func (m *BarkAddressMutation) AddClientIDs(ids ...int) {
+	if m.client == nil {
+		m.client = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.client[ids[i]] = struct{}{}
+	}
+}
+
+// ClearClient clears the "client" edge to the ExtensionClient entity.
+func (m *BarkAddressMutation) ClearClient() {
+	m.clearedclient = true
+}
+
+// ClientCleared reports if the "client" edge to the ExtensionClient entity was cleared.
+func (m *BarkAddressMutation) ClientCleared() bool {
+	return m.clearedclient
+}
+
+// RemoveClientIDs removes the "client" edge to the ExtensionClient entity by IDs.
+func (m *BarkAddressMutation) RemoveClientIDs(ids ...int) {
+	if m.removedclient == nil {
+		m.removedclient = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.client, ids[i])
+		m.removedclient[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedClient returns the removed IDs of the "client" edge to the ExtensionClient entity.
+func (m *BarkAddressMutation) RemovedClientIDs() (ids []int) {
+	for id := range m.removedclient {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ClientIDs returns the "client" edge IDs in the mutation.
+func (m *BarkAddressMutation) ClientIDs() (ids []int) {
+	for id := range m.client {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetClient resets all changes to the "client" edge.
+func (m *BarkAddressMutation) ResetClient() {
+	m.client = nil
+	m.clearedclient = false
+	m.removedclient = nil
+}
+
+// Where appends a list predicates to the BarkAddressMutation builder.
+func (m *BarkAddressMutation) Where(ps ...predicate.BarkAddress) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *BarkAddressMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (BarkAddress).
+func (m *BarkAddressMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BarkAddressMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.name != nil {
+		fields = append(fields, barkaddress.FieldName)
+	}
+	if m.target != nil {
+		fields = append(fields, barkaddress.FieldTarget)
+	}
+	if m.index != nil {
+		fields = append(fields, barkaddress.FieldIndex)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BarkAddressMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case barkaddress.FieldName:
+		return m.Name()
+	case barkaddress.FieldTarget:
+		return m.Target()
+	case barkaddress.FieldIndex:
+		return m.Index()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BarkAddressMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case barkaddress.FieldName:
+		return m.OldName(ctx)
+	case barkaddress.FieldTarget:
+		return m.OldTarget(ctx)
+	case barkaddress.FieldIndex:
+		return m.OldIndex(ctx)
+	}
+	return nil, fmt.Errorf("unknown BarkAddress field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BarkAddressMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case barkaddress.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case barkaddress.FieldTarget:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTarget(v)
+		return nil
+	case barkaddress.FieldIndex:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIndex(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BarkAddress field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BarkAddressMutation) AddedFields() []string {
+	var fields []string
+	if m.addindex != nil {
+		fields = append(fields, barkaddress.FieldIndex)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BarkAddressMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case barkaddress.FieldIndex:
+		return m.AddedIndex()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BarkAddressMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case barkaddress.FieldIndex:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIndex(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BarkAddress numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BarkAddressMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BarkAddressMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BarkAddressMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BarkAddress nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BarkAddressMutation) ResetField(name string) error {
+	switch name {
+	case barkaddress.FieldName:
+		m.ResetName()
+		return nil
+	case barkaddress.FieldTarget:
+		m.ResetTarget()
+		return nil
+	case barkaddress.FieldIndex:
+		m.ResetIndex()
+		return nil
+	}
+	return fmt.Errorf("unknown BarkAddress field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BarkAddressMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.client != nil {
+		edges = append(edges, barkaddress.EdgeClient)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BarkAddressMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case barkaddress.EdgeClient:
+		ids := make([]ent.Value, 0, len(m.client))
+		for id := range m.client {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BarkAddressMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedclient != nil {
+		edges = append(edges, barkaddress.EdgeClient)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BarkAddressMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case barkaddress.EdgeClient:
+		ids := make([]ent.Value, 0, len(m.removedclient))
+		for id := range m.removedclient {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BarkAddressMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedclient {
+		edges = append(edges, barkaddress.EdgeClient)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BarkAddressMutation) EdgeCleared(name string) bool {
+	switch name {
+	case barkaddress.EdgeClient:
+		return m.clearedclient
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BarkAddressMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown BarkAddress unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BarkAddressMutation) ResetEdge(name string) error {
+	switch name {
+	case barkaddress.EdgeClient:
+		m.ResetClient()
+		return nil
+	}
+	return fmt.Errorf("unknown BarkAddress edge %s", name)
+}
 
 // ExtensionClientMutation represents an operation that mutates the ExtensionClient nodes in the graph.
 type ExtensionClientMutation struct {
@@ -45,6 +595,9 @@ type ExtensionClientMutation struct {
 	groups           map[int]struct{}
 	removedgroups    map[int]struct{}
 	clearedgroups    bool
+	addresses        map[int]struct{}
+	removedaddresses map[int]struct{}
+	clearedaddresses bool
 	done             bool
 	oldValue         func(context.Context) (*ExtensionClient, error)
 	predicates       []predicate.ExtensionClient
@@ -346,6 +899,60 @@ func (m *ExtensionClientMutation) ResetGroups() {
 	m.removedgroups = nil
 }
 
+// AddAddressIDs adds the "addresses" edge to the BarkAddress entity by ids.
+func (m *ExtensionClientMutation) AddAddressIDs(ids ...int) {
+	if m.addresses == nil {
+		m.addresses = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.addresses[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAddresses clears the "addresses" edge to the BarkAddress entity.
+func (m *ExtensionClientMutation) ClearAddresses() {
+	m.clearedaddresses = true
+}
+
+// AddressesCleared reports if the "addresses" edge to the BarkAddress entity was cleared.
+func (m *ExtensionClientMutation) AddressesCleared() bool {
+	return m.clearedaddresses
+}
+
+// RemoveAddressIDs removes the "addresses" edge to the BarkAddress entity by IDs.
+func (m *ExtensionClientMutation) RemoveAddressIDs(ids ...int) {
+	if m.removedaddresses == nil {
+		m.removedaddresses = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.addresses, ids[i])
+		m.removedaddresses[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAddresses returns the removed IDs of the "addresses" edge to the BarkAddress entity.
+func (m *ExtensionClientMutation) RemovedAddressesIDs() (ids []int) {
+	for id := range m.removedaddresses {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AddressesIDs returns the "addresses" edge IDs in the mutation.
+func (m *ExtensionClientMutation) AddressesIDs() (ids []int) {
+	for id := range m.addresses {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAddresses resets all changes to the "addresses" edge.
+func (m *ExtensionClientMutation) ResetAddresses() {
+	m.addresses = nil
+	m.clearedaddresses = false
+	m.removedaddresses = nil
+}
+
 // Where appends a list predicates to the ExtensionClientMutation builder.
 func (m *ExtensionClientMutation) Where(ps ...predicate.ExtensionClient) {
 	m.predicates = append(m.predicates, ps...)
@@ -515,9 +1122,12 @@ func (m *ExtensionClientMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ExtensionClientMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.groups != nil {
 		edges = append(edges, extensionclient.EdgeGroups)
+	}
+	if m.addresses != nil {
+		edges = append(edges, extensionclient.EdgeAddresses)
 	}
 	return edges
 }
@@ -532,15 +1142,24 @@ func (m *ExtensionClientMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case extensionclient.EdgeAddresses:
+		ids := make([]ent.Value, 0, len(m.addresses))
+		for id := range m.addresses {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ExtensionClientMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedgroups != nil {
 		edges = append(edges, extensionclient.EdgeGroups)
+	}
+	if m.removedaddresses != nil {
+		edges = append(edges, extensionclient.EdgeAddresses)
 	}
 	return edges
 }
@@ -555,15 +1174,24 @@ func (m *ExtensionClientMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case extensionclient.EdgeAddresses:
+		ids := make([]ent.Value, 0, len(m.removedaddresses))
+		for id := range m.removedaddresses {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ExtensionClientMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedgroups {
 		edges = append(edges, extensionclient.EdgeGroups)
+	}
+	if m.clearedaddresses {
+		edges = append(edges, extensionclient.EdgeAddresses)
 	}
 	return edges
 }
@@ -574,6 +1202,8 @@ func (m *ExtensionClientMutation) EdgeCleared(name string) bool {
 	switch name {
 	case extensionclient.EdgeGroups:
 		return m.clearedgroups
+	case extensionclient.EdgeAddresses:
+		return m.clearedaddresses
 	}
 	return false
 }
@@ -592,6 +1222,9 @@ func (m *ExtensionClientMutation) ResetEdge(name string) error {
 	switch name {
 	case extensionclient.EdgeGroups:
 		m.ResetGroups()
+		return nil
+	case extensionclient.EdgeAddresses:
+		m.ResetAddresses()
 		return nil
 	}
 	return fmt.Errorf("unknown ExtensionClient edge %s", name)

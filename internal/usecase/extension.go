@@ -1,6 +1,13 @@
 package usecase
 
 import (
+	"aio/ent"
+	"aio/ent/barkaddress"
+	"aio/ent/extensionclient"
+	"aio/ent/group"
+	"aio/ent/tab"
+	"aio/internal/pb"
+	"aio/pkg/logger"
 	"context"
 	"database/sql"
 	"errors"
@@ -8,12 +15,6 @@ import (
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 	"google.golang.org/protobuf/encoding/prototext"
-	"aio/ent"
-	"aio/ent/extensionclient"
-	"aio/ent/group"
-	"aio/ent/tab"
-	"aio/internal/pb"
-	"aio/pkg/logger"
 	"time"
 )
 
@@ -253,4 +254,53 @@ func (e *ExtensionUseCase) SwapTab(ctx context.Context, uid, firstGroupUid, firs
 		}
 		return nil
 	})
+}
+
+func (e *ExtensionUseCase) BarkAddresses(ctx context.Context, uid uuid.UUID) ([]*ent.BarkAddress, error) {
+	client, err := e.cli.ExtensionClient.Query().Where(extensionclient.ClientUIDEQ(uid)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	addresses, err := client.QueryAddresses().All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return addresses, nil
+}
+
+func (e *ExtensionUseCase) AddBarkAddress(ctx context.Context, uid uuid.UUID, addr *pb.BarkDevice) error {
+	client, err := e.cli.ExtensionClient.Query().Where(extensionclient.ClientUIDEQ(uid)).Only(ctx)
+	if err != nil {
+		return err
+	}
+	err = e.cli.BarkAddress.
+		Create().
+		SetName(addr.GetName()).
+		SetTarget(addr.GetName()).
+		SetIndex(addr.GetId()).
+		AddClient(client).
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *ExtensionUseCase) DropBarkAddress(ctx context.Context, uid uuid.UUID, addr *pb.BarkDevice) error {
+	client, err := e.cli.ExtensionClient.Query().Where(extensionclient.ClientUIDEQ(uid)).Only(ctx)
+	if err != nil {
+		return err
+	}
+	device, err := client.QueryAddresses().Where(barkaddress.And(
+		barkaddress.NameEQ(addr.GetName()),
+		barkaddress.TargetEQ(addr.GetUrl()),
+	)).Only(ctx)
+	if err != nil {
+		return err
+	}
+	err = e.cli.BarkAddress.DeleteOne(device).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }

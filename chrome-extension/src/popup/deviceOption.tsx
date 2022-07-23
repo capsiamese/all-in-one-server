@@ -1,29 +1,26 @@
 import {Flex, Select, Square} from "@chakra-ui/react";
 import {HamburgerIcon} from "@chakra-ui/icons";
 import React, {ChangeEvent, useState} from "react";
-import {
-    Device,
-    GetDefaultDevice,
-    GetDeviceList,
-    OnDefaultDeviceChange,
-    OnDeviceListChange,
-    SetDefaultDevice
-} from "../common/bark";
+import {tab} from "../pb/compiled";
+import Store from "../common/storage";
+import {BarkDefaultDevice, BarkDeviceList} from "../common/storageKey";
+import BarkDevice = tab.BarkDevice;
 
 export default function DeviceOption() {
-    const [def, setDef] = useState<Device>({name: "", target: ""});
-    const [list, setList] = useState<Device[]>([]);
+    const dfs = new Store<BarkDevice>(BarkDefaultDevice, new BarkDevice());
+    const dl = new Store<BarkDevice[]>(BarkDeviceList, []);
+    const [def, setDef] = useState<BarkDevice>(new BarkDevice({name: "", url: ""}));
+    const [list, setList] = useState<BarkDevice[]>([]);
 
-    GetDefaultDevice().then(setDef);
-    OnDefaultDeviceChange(setDef);
-
-    GetDeviceList().then(setList);
-    OnDeviceListChange(setList);
+    dfs.get().then(setDef)
+    dl.get().then(setList)
+    dfs.addListener(setDef)
+    dl.addListener(setList)
 
     const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
         for (let i of list) {
             if (i.name === event.target.value) {
-                SetDefaultDevice(i).then();
+                dfs.set(i).then()
                 break
             }
         }

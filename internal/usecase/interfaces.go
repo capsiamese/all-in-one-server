@@ -94,6 +94,10 @@ type (
 		RemoveGroup(ctx context.Context, uid, groupUid uuid.UUID) error
 		RemoveTab(ctx context.Context, uid, groupUid, tabUid uuid.UUID) error
 
+		BarkAddresses(ctx context.Context, uid uuid.UUID) ([]*ent.BarkAddress, error)
+		AddBarkAddress(ctx context.Context, uid uuid.UUID, addr *pb.BarkDevice) error
+		DropBarkAddress(ctx context.Context, uid uuid.UUID, addr *pb.BarkDevice) error
+
 		SwapTab(ctx context.Context, uid, firstGroupUid, firstGroupTabUid, secondGroupUid, secondGroupTabUid uuid.UUID) error
 		//MoveTab(ctx context.Context, uid, fromGroup, toGroup, tabUid uuid.UUID) error
 

@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// BarkAddressesColumns holds the columns for the "bark_addresses" table.
+	BarkAddressesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "target", Type: field.TypeString},
+		{Name: "index", Type: field.TypeInt64},
+	}
+	// BarkAddressesTable holds the schema information for the "bark_addresses" table.
+	BarkAddressesTable = &schema.Table{
+		Name:       "bark_addresses",
+		Columns:    BarkAddressesColumns,
+		PrimaryKey: []*schema.Column{BarkAddressesColumns[0]},
+	}
 	// ExtensionClientsColumns holds the columns for the "extension_clients" table.
 	ExtensionClientsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -71,15 +84,44 @@ var (
 			},
 		},
 	}
+	// ExtensionClientAddressesColumns holds the columns for the "extension_client_addresses" table.
+	ExtensionClientAddressesColumns = []*schema.Column{
+		{Name: "extension_client_id", Type: field.TypeInt},
+		{Name: "bark_address_id", Type: field.TypeInt},
+	}
+	// ExtensionClientAddressesTable holds the schema information for the "extension_client_addresses" table.
+	ExtensionClientAddressesTable = &schema.Table{
+		Name:       "extension_client_addresses",
+		Columns:    ExtensionClientAddressesColumns,
+		PrimaryKey: []*schema.Column{ExtensionClientAddressesColumns[0], ExtensionClientAddressesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "extension_client_addresses_extension_client_id",
+				Columns:    []*schema.Column{ExtensionClientAddressesColumns[0]},
+				RefColumns: []*schema.Column{ExtensionClientsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "extension_client_addresses_bark_address_id",
+				Columns:    []*schema.Column{ExtensionClientAddressesColumns[1]},
+				RefColumns: []*schema.Column{BarkAddressesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BarkAddressesTable,
 		ExtensionClientsTable,
 		GroupsTable,
 		TabsTable,
+		ExtensionClientAddressesTable,
 	}
 )
 
 func init() {
 	GroupsTable.ForeignKeys[0].RefTable = ExtensionClientsTable
 	TabsTable.ForeignKeys[0].RefTable = GroupsTable
+	ExtensionClientAddressesTable.ForeignKeys[0].RefTable = ExtensionClientsTable
+	ExtensionClientAddressesTable.ForeignKeys[1].RefTable = BarkAddressesTable
 }

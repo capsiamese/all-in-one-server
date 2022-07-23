@@ -1,15 +1,19 @@
 import Browser from "webextension-polyfill";
-import {OnDefaultDeviceChange} from "../common/bark";
 import {SendToastMessage} from "../common/toastMessage";
 import {createContextMenu} from "../common/contextMenu";
+import Store from "../common/storage";
+import {tab} from "../pb/compiled";
+import {BarkDefaultDevice} from "../common/storageKey";
+import BarkDevice = tab.BarkDevice;
 
 Browser.runtime.onStartup.addListener(() => {
 
 });
 
-OnDefaultDeviceChange((data) => {
-    console.log(data, "background received");
-});
+const defaultDevice = new Store<BarkDevice>(BarkDefaultDevice)
+defaultDevice.addListener(d => {
+    console.log(d, "background received");
+})
 
 console.log(navigator);
 console.log(Notification);

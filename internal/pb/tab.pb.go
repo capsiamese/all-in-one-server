@@ -399,6 +399,69 @@ func (x *BarkHistory) GetParams() map[string]string {
 	return nil
 }
 
+type BarkDevice struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Url  string `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+}
+
+func (x *BarkDevice) Reset() {
+	*x = BarkDevice{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tab_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BarkDevice) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BarkDevice) ProtoMessage() {}
+
+func (x *BarkDevice) ProtoReflect() protoreflect.Message {
+	mi := &file_tab_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BarkDevice.ProtoReflect.Descriptor instead.
+func (*BarkDevice) Descriptor() ([]byte, []int) {
+	return file_tab_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *BarkDevice) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *BarkDevice) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *BarkDevice) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
 var File_tab_proto protoreflect.FileDescriptor
 
 var file_tab_proto_rawDesc = []byte{
@@ -445,9 +508,13 @@ var file_tab_proto_rawDesc = []byte{
 	0x6d, 0x73, 0x1a, 0x39, 0x0a, 0x0b, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x45, 0x6e, 0x74, 0x72,
 	0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
 	0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x42, 0x0d, 0x5a,
-	0x0b, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x42, 0x0a,
+	0x0a, 0x42, 0x61, 0x72, 0x6b, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e,
+	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12,
+	0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72,
+	0x6c, 0x42, 0x0d, 0x5a, 0x0b, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x62,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -462,20 +529,21 @@ func file_tab_proto_rawDescGZIP() []byte {
 	return file_tab_proto_rawDescData
 }
 
-var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_tab_proto_goTypes = []interface{}{
 	(*Tab)(nil),         // 0: tab.Tab
 	(*GroupOption)(nil), // 1: tab.GroupOption
 	(*Group)(nil),       // 2: tab.Group
 	(*Client)(nil),      // 3: tab.Client
 	(*BarkHistory)(nil), // 4: tab.BarkHistory
-	nil,                 // 5: tab.BarkHistory.ParamsEntry
+	(*BarkDevice)(nil),  // 5: tab.BarkDevice
+	nil,                 // 6: tab.BarkHistory.ParamsEntry
 }
 var file_tab_proto_depIdxs = []int32{
 	1, // 0: tab.Group.option:type_name -> tab.GroupOption
 	0, // 1: tab.Group.tabs:type_name -> tab.Tab
 	2, // 2: tab.Client.groups:type_name -> tab.Group
-	5, // 3: tab.BarkHistory.params:type_name -> tab.BarkHistory.ParamsEntry
+	6, // 3: tab.BarkHistory.params:type_name -> tab.BarkHistory.ParamsEntry
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -549,6 +617,18 @@ func file_tab_proto_init() {
 				return nil
 			}
 		}
+		file_tab_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BarkDevice); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -556,7 +636,7 @@ func file_tab_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_tab_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

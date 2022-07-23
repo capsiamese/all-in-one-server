@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"aio/ent/barkaddress"
 	"aio/ent/extensionclient"
 	"aio/ent/group"
 	"context"
@@ -59,6 +60,21 @@ func (ecc *ExtensionClientCreate) AddGroups(g ...*Group) *ExtensionClientCreate 
 		ids[i] = g[i].ID
 	}
 	return ecc.AddGroupIDs(ids...)
+}
+
+// AddAddressIDs adds the "addresses" edge to the BarkAddress entity by IDs.
+func (ecc *ExtensionClientCreate) AddAddressIDs(ids ...int) *ExtensionClientCreate {
+	ecc.mutation.AddAddressIDs(ids...)
+	return ecc
+}
+
+// AddAddresses adds the "addresses" edges to the BarkAddress entity.
+func (ecc *ExtensionClientCreate) AddAddresses(b ...*BarkAddress) *ExtensionClientCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ecc.AddAddressIDs(ids...)
 }
 
 // Mutation returns the ExtensionClientMutation object of the builder.
@@ -223,6 +239,25 @@ func (ecc *ExtensionClientCreate) createSpec() (*ExtensionClient, *sqlgraph.Crea
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ecc.mutation.AddressesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   extensionclient.AddressesTable,
+			Columns: extensionclient.AddressesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: barkaddress.FieldID,
 				},
 			},
 		}

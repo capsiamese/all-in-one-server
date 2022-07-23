@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// BarkAddress is the predicate function for barkaddress builders.
+type BarkAddress func(*sql.Selector)
+
 // ExtensionClient is the predicate function for extensionclient builders.
 type ExtensionClient func(*sql.Selector)
 

@@ -54,3 +54,14 @@ func TabToPB(et *ent.Tab) *Tab {
 	}
 	return t
 }
+
+func AddressToPB(ea *ent.BarkAddress) *BarkDevice {
+	if ea == nil {
+		return nil
+	}
+	return &BarkDevice{
+		Name: ea.Name,
+		Url:  ea.Target,
+		Id:   ea.Index,
+	}
+}

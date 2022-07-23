@@ -27,6 +27,7 @@ func (ExtensionClient) Fields() []ent.Field {
 func (ExtensionClient) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("groups", Group.Type),
+		edge.To("addresses", BarkAddress.Type),
 	}
 }
 

@@ -1,14 +1,16 @@
 import {Box, Button, Center, Link, List, ListItem, Skeleton, useBoolean} from "@chakra-ui/react";
 import React, {useEffect, useState} from "react";
-import {Device, PullHistory, TargetDevice} from "../common/bark";
+import {PullHistory} from "../common/bark";
 import Store from "../common/storage";
 import {tab} from "../pb/compiled";
 import _ from "lodash";
+import {BarkDefaultDevice} from "../common/storageKey";
 import BarkHistory = tab.BarkHistory;
+import BarkDevice = tab.BarkDevice;
 
 export default function BarkHistoryView() {
     const [history, setHistory] = useState<BarkHistory[]>([])
-    const ds = new Store<Device>(TargetDevice)
+    const ds = new Store<BarkDevice>(BarkDefaultDevice)
     const cache = new Store<BarkHistory[]>("bark-history-cache", [])
 
     useEffect(() => {
@@ -21,9 +23,9 @@ export default function BarkHistoryView() {
         on()
         ds.get().then(d => {
             let offset = history.length
-            PullHistory(d.target, offset, 3).then(data => {
+            PullHistory(d.url, offset, 3).then(data => {
                 off()
-                history.push(...data)
+                history.push(...data.map<BarkHistory>(d => new BarkHistory(d)))
                 setHistory(history)
                 cache.set(history).then()
             }).catch(off)

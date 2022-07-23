@@ -17,6 +17,8 @@ const (
 	FieldLastAccessTime = "last_access_time"
 	// EdgeGroups holds the string denoting the groups edge name in mutations.
 	EdgeGroups = "groups"
+	// EdgeAddresses holds the string denoting the addresses edge name in mutations.
+	EdgeAddresses = "addresses"
 	// Table holds the table name of the extensionclient in the database.
 	Table = "extension_clients"
 	// GroupsTable is the table that holds the groups relation/edge.
@@ -26,6 +28,11 @@ const (
 	GroupsInverseTable = "groups"
 	// GroupsColumn is the table column denoting the groups relation/edge.
 	GroupsColumn = "extension_client_groups"
+	// AddressesTable is the table that holds the addresses relation/edge. The primary key declared below.
+	AddressesTable = "extension_client_addresses"
+	// AddressesInverseTable is the table name for the BarkAddress entity.
+	// It exists in this package in order to avoid circular dependency with the "barkaddress" package.
+	AddressesInverseTable = "bark_addresses"
 )
 
 // Columns holds all SQL columns for extensionclient fields.
@@ -36,6 +43,12 @@ var Columns = []string{
 	FieldClientUID,
 	FieldLastAccessTime,
 }
+
+var (
+	// AddressesPrimaryKey and AddressesColumn2 are the table columns denoting the
+	// primary key for the addresses relation (M2M).
+	AddressesPrimaryKey = []string{"extension_client_id", "bark_address_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

@@ -1,13 +1,13 @@
 import Browser, {Menus, Tabs} from "webextension-polyfill";
-import {PushToDefault} from "./bark";
-import {StoreTabs, TabInfo} from "./tabStore";
+import {StoreTabs} from "./tabStore";
+import {Push} from "./bark";
+import {tab} from "../pb/compiled";
 import Tab = Tabs.Tab;
 import OnClickData = Menus.OnClickData;
+import ITab = tab.ITab;
 
 export function createContextMenu() {
-    items.forEach(i => {
-        i();
-    });
+    items.forEach(i => i());
     Browser.contextMenus.onClicked.addListener(onContextMenuClick);
 }
 
@@ -53,7 +53,7 @@ handler[BarkSender] = (info: OnClickData, tab: Tab | undefined) => {
     if (!u) {
         return
     }
-    PushToDefault({url: u, title: tab?.title, content: "from sw"});
+    Push({url: u, title: tab?.title, content: "from sw"}).then();
 }
 
 handler[TabStoreThis] = (info: OnClickData, tab: Tab | undefined) => {
@@ -84,17 +84,18 @@ const tabOptions = (op: string, info: OnClickData, tab: Tab | undefined) => {
                 default:
                     return false
             }
-        }).map<TabInfo>((t) => {
+        }).map<ITab>((t, i) => {
             if (t.id) {
                 Browser.tabs.remove(t.id).then(() => {
                     console.log(`tab ${t.id} remove`)
                 })
             }
             return {
-                Uid: crypto.randomUUID(),
-                Url: t.url ?? "",
-                Title: t.title,
-                FavIconUrl: t.favIconUrl,
+                uid: crypto.randomUUID(),
+                url: t.url ?? "",
+                name: t.title,
+                favicon: t.favIconUrl,
+                index: i,
             }
         })).then()
     })

@@ -7,7 +7,6 @@ import (
 	"aio/ent/predicate"
 	"aio/ent/tab"
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -302,15 +301,17 @@ func (tq *TabQuery) WithGroup(opts ...func(*GroupQuery)) *TabQuery {
 //		Scan(ctx, &v)
 //
 func (tq *TabQuery) GroupBy(field string, fields ...string) *TabGroupBy {
-	group := &TabGroupBy{config: tq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &TabGroupBy{config: tq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return tq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = tab.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -328,7 +329,10 @@ func (tq *TabQuery) GroupBy(field string, fields ...string) *TabGroupBy {
 //
 func (tq *TabQuery) Select(fields ...string) *TabSelect {
 	tq.fields = append(tq.fields, fields...)
-	return &TabSelect{TabQuery: tq}
+	selbuild := &TabSelect{TabQuery: tq}
+	selbuild.label = tab.Label
+	selbuild.flds, selbuild.scan = &tq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (tq *TabQuery) prepareQuery(ctx context.Context) error {
@@ -347,7 +351,7 @@ func (tq *TabQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (tq *TabQuery) sqlAll(ctx context.Context) ([]*Tab, error) {
+func (tq *TabQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tab, error) {
 	var (
 		nodes       = []*Tab{}
 		withFKs     = tq.withFKs
@@ -363,17 +367,16 @@ func (tq *TabQuery) sqlAll(ctx context.Context) ([]*Tab, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, tab.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Tab{config: tq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Tab).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Tab{config: tq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
 		return nil, err
@@ -514,6 +517,7 @@ func (tq *TabQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // TabGroupBy is the group-by builder for Tab entities.
 type TabGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -535,209 +539,6 @@ func (tgb *TabGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	tgb.sql = query
 	return tgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (tgb *TabGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := tgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TabGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (tgb *TabGroupBy) StringsX(ctx context.Context) []string {
-	v, err := tgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = tgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (tgb *TabGroupBy) StringX(ctx context.Context) string {
-	v, err := tgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TabGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (tgb *TabGroupBy) IntsX(ctx context.Context) []int {
-	v, err := tgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = tgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (tgb *TabGroupBy) IntX(ctx context.Context) int {
-	v, err := tgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TabGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (tgb *TabGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := tgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = tgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (tgb *TabGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := tgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TabGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (tgb *TabGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := tgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TabGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = tgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (tgb *TabGroupBy) BoolX(ctx context.Context) bool {
-	v, err := tgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (tgb *TabGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -781,6 +582,7 @@ func (tgb *TabGroupBy) sqlQuery() *sql.Selector {
 // TabSelect is the builder for selecting fields of Tab entities.
 type TabSelect struct {
 	*TabQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -792,201 +594,6 @@ func (ts *TabSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ts.sql = ts.TabQuery.sqlQuery(ctx)
 	return ts.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ts *TabSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ts.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TabSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ts *TabSelect) StringsX(ctx context.Context) []string {
-	v, err := ts.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ts.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ts *TabSelect) StringX(ctx context.Context) string {
-	v, err := ts.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TabSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ts *TabSelect) IntsX(ctx context.Context) []int {
-	v, err := ts.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ts.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ts *TabSelect) IntX(ctx context.Context) int {
-	v, err := ts.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TabSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ts *TabSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ts.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ts.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ts *TabSelect) Float64X(ctx context.Context) float64 {
-	v, err := ts.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TabSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ts *TabSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ts.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ts *TabSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ts.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{tab.Label}
-	default:
-		err = fmt.Errorf("ent: TabSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ts *TabSelect) BoolX(ctx context.Context) bool {
-	v, err := ts.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ts *TabSelect) sqlScan(ctx context.Context, v interface{}) error {

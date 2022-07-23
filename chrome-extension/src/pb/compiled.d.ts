@@ -232,6 +232,9 @@ export namespace tab {
         /** Group index */
         index?: (number|null);
 
+        /** Group ts */
+        ts?: (number|Long|null);
+
         /** Group option */
         option?: (tab.IGroupOption|null);
 
@@ -256,6 +259,9 @@ export namespace tab {
 
         /** Group index. */
         public index: number;
+
+        /** Group ts. */
+        public ts: (number|Long);
 
         /** Group option. */
         public option?: (tab.IGroupOption|null);
@@ -589,6 +595,224 @@ export namespace tab {
 
         /**
          * Gets the default type url for BarkHistory
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
+    }
+
+    /** Properties of a BarkDevice. */
+    interface IBarkDevice {
+
+        /** BarkDevice id */
+        id?: (number|Long|null);
+
+        /** BarkDevice name */
+        name?: (string|null);
+
+        /** BarkDevice url */
+        url?: (string|null);
+    }
+
+    /** Represents a BarkDevice. */
+    class BarkDevice implements IBarkDevice {
+
+        /**
+         * Constructs a new BarkDevice.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: tab.IBarkDevice);
+
+        /** BarkDevice id. */
+        public id: (number|Long);
+
+        /** BarkDevice name. */
+        public name: string;
+
+        /** BarkDevice url. */
+        public url: string;
+
+        /**
+         * Creates a new BarkDevice instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns BarkDevice instance
+         */
+        public static create(properties?: tab.IBarkDevice): tab.BarkDevice;
+
+        /**
+         * Encodes the specified BarkDevice message. Does not implicitly {@link tab.BarkDevice.verify|verify} messages.
+         * @param message BarkDevice message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: tab.IBarkDevice, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified BarkDevice message, length delimited. Does not implicitly {@link tab.BarkDevice.verify|verify} messages.
+         * @param message BarkDevice message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: tab.IBarkDevice, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a BarkDevice message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns BarkDevice
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): tab.BarkDevice;
+
+        /**
+         * Decodes a BarkDevice message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns BarkDevice
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): tab.BarkDevice;
+
+        /**
+         * Verifies a BarkDevice message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a BarkDevice message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BarkDevice
+         */
+        public static fromObject(object: { [k: string]: any }): tab.BarkDevice;
+
+        /**
+         * Creates a plain object from a BarkDevice message. Also converts values to other types if specified.
+         * @param message BarkDevice
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: tab.BarkDevice, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BarkDevice to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for BarkDevice
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
+    }
+
+    /** Properties of a BarkMessage. */
+    interface IBarkMessage {
+
+        /** BarkMessage title */
+        title?: (string|null);
+
+        /** BarkMessage content */
+        content?: (string|null);
+
+        /** BarkMessage url */
+        url?: (string|null);
+    }
+
+    /** Represents a BarkMessage. */
+    class BarkMessage implements IBarkMessage {
+
+        /**
+         * Constructs a new BarkMessage.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: tab.IBarkMessage);
+
+        /** BarkMessage title. */
+        public title: string;
+
+        /** BarkMessage content. */
+        public content: string;
+
+        /** BarkMessage url. */
+        public url: string;
+
+        /**
+         * Creates a new BarkMessage instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns BarkMessage instance
+         */
+        public static create(properties?: tab.IBarkMessage): tab.BarkMessage;
+
+        /**
+         * Encodes the specified BarkMessage message. Does not implicitly {@link tab.BarkMessage.verify|verify} messages.
+         * @param message BarkMessage message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: tab.IBarkMessage, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified BarkMessage message, length delimited. Does not implicitly {@link tab.BarkMessage.verify|verify} messages.
+         * @param message BarkMessage message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: tab.IBarkMessage, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a BarkMessage message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns BarkMessage
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): tab.BarkMessage;
+
+        /**
+         * Decodes a BarkMessage message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns BarkMessage
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): tab.BarkMessage;
+
+        /**
+         * Verifies a BarkMessage message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a BarkMessage message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BarkMessage
+         */
+        public static fromObject(object: { [k: string]: any }): tab.BarkMessage;
+
+        /**
+         * Creates a plain object from a BarkMessage message. Also converts values to other types if specified.
+         * @param message BarkMessage
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: tab.BarkMessage, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BarkMessage to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for BarkMessage
          * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
          * @returns The default type url
          */

@@ -19,8 +19,9 @@ message Group {
   string name = 1;
   string uid = 2;
   int32 index = 3;
-  GroupOption option = 4;
-  repeated Tab tabs = 5;
+  int64 ts = 4;
+  GroupOption option = 5;
+  repeated Tab tabs = 6;
 }
 
 message Client {
@@ -39,4 +40,16 @@ message BarkHistory {
   string title = 5;
   string content = 6;
   map<string, string> params = 7;
+}
+
+message BarkDevice {
+  int64 id = 1;
+  string name = 2;
+  string url = 3;
+}
+
+message BarkMessage {
+  string title = 1;
+  string content = 2;
+  string url = 3;
 }

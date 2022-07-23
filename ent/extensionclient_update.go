@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"aio/ent/barkaddress"
 	"aio/ent/extensionclient"
 	"aio/ent/group"
 	"aio/ent/predicate"
@@ -70,6 +71,21 @@ func (ecu *ExtensionClientUpdate) AddGroups(g ...*Group) *ExtensionClientUpdate 
 	return ecu.AddGroupIDs(ids...)
 }
 
+// AddAddressIDs adds the "addresses" edge to the BarkAddress entity by IDs.
+func (ecu *ExtensionClientUpdate) AddAddressIDs(ids ...int) *ExtensionClientUpdate {
+	ecu.mutation.AddAddressIDs(ids...)
+	return ecu
+}
+
+// AddAddresses adds the "addresses" edges to the BarkAddress entity.
+func (ecu *ExtensionClientUpdate) AddAddresses(b ...*BarkAddress) *ExtensionClientUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ecu.AddAddressIDs(ids...)
+}
+
 // Mutation returns the ExtensionClientMutation object of the builder.
 func (ecu *ExtensionClientUpdate) Mutation() *ExtensionClientMutation {
 	return ecu.mutation
@@ -94,6 +110,27 @@ func (ecu *ExtensionClientUpdate) RemoveGroups(g ...*Group) *ExtensionClientUpda
 		ids[i] = g[i].ID
 	}
 	return ecu.RemoveGroupIDs(ids...)
+}
+
+// ClearAddresses clears all "addresses" edges to the BarkAddress entity.
+func (ecu *ExtensionClientUpdate) ClearAddresses() *ExtensionClientUpdate {
+	ecu.mutation.ClearAddresses()
+	return ecu
+}
+
+// RemoveAddressIDs removes the "addresses" edge to BarkAddress entities by IDs.
+func (ecu *ExtensionClientUpdate) RemoveAddressIDs(ids ...int) *ExtensionClientUpdate {
+	ecu.mutation.RemoveAddressIDs(ids...)
+	return ecu
+}
+
+// RemoveAddresses removes "addresses" edges to BarkAddress entities.
+func (ecu *ExtensionClientUpdate) RemoveAddresses(b ...*BarkAddress) *ExtensionClientUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ecu.RemoveAddressIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -271,6 +308,60 @@ func (ecu *ExtensionClientUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if ecu.mutation.AddressesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   extensionclient.AddressesTable,
+			Columns: extensionclient.AddressesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: barkaddress.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecu.mutation.RemovedAddressesIDs(); len(nodes) > 0 && !ecu.mutation.AddressesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   extensionclient.AddressesTable,
+			Columns: extensionclient.AddressesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: barkaddress.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecu.mutation.AddressesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   extensionclient.AddressesTable,
+			Columns: extensionclient.AddressesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: barkaddress.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ecu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{extensionclient.Label}
@@ -329,6 +420,21 @@ func (ecuo *ExtensionClientUpdateOne) AddGroups(g ...*Group) *ExtensionClientUpd
 	return ecuo.AddGroupIDs(ids...)
 }
 
+// AddAddressIDs adds the "addresses" edge to the BarkAddress entity by IDs.
+func (ecuo *ExtensionClientUpdateOne) AddAddressIDs(ids ...int) *ExtensionClientUpdateOne {
+	ecuo.mutation.AddAddressIDs(ids...)
+	return ecuo
+}
+
+// AddAddresses adds the "addresses" edges to the BarkAddress entity.
+func (ecuo *ExtensionClientUpdateOne) AddAddresses(b ...*BarkAddress) *ExtensionClientUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ecuo.AddAddressIDs(ids...)
+}
+
 // Mutation returns the ExtensionClientMutation object of the builder.
 func (ecuo *ExtensionClientUpdateOne) Mutation() *ExtensionClientMutation {
 	return ecuo.mutation
@@ -353,6 +459,27 @@ func (ecuo *ExtensionClientUpdateOne) RemoveGroups(g ...*Group) *ExtensionClient
 		ids[i] = g[i].ID
 	}
 	return ecuo.RemoveGroupIDs(ids...)
+}
+
+// ClearAddresses clears all "addresses" edges to the BarkAddress entity.
+func (ecuo *ExtensionClientUpdateOne) ClearAddresses() *ExtensionClientUpdateOne {
+	ecuo.mutation.ClearAddresses()
+	return ecuo
+}
+
+// RemoveAddressIDs removes the "addresses" edge to BarkAddress entities by IDs.
+func (ecuo *ExtensionClientUpdateOne) RemoveAddressIDs(ids ...int) *ExtensionClientUpdateOne {
+	ecuo.mutation.RemoveAddressIDs(ids...)
+	return ecuo
+}
+
+// RemoveAddresses removes "addresses" edges to BarkAddress entities.
+func (ecuo *ExtensionClientUpdateOne) RemoveAddresses(b ...*BarkAddress) *ExtensionClientUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ecuo.RemoveAddressIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -546,6 +673,60 @@ func (ecuo *ExtensionClientUpdateOne) sqlSave(ctx context.Context) (_node *Exten
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ecuo.mutation.AddressesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   extensionclient.AddressesTable,
+			Columns: extensionclient.AddressesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: barkaddress.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecuo.mutation.RemovedAddressesIDs(); len(nodes) > 0 && !ecuo.mutation.AddressesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   extensionclient.AddressesTable,
+			Columns: extensionclient.AddressesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: barkaddress.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ecuo.mutation.AddressesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   extensionclient.AddressesTable,
+			Columns: extensionclient.AddressesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: barkaddress.FieldID,
 				},
 			},
 		}
