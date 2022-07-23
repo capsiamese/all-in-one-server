@@ -8,6 +8,7 @@ import (
 	"github.com/go-redis/cache/v8"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"time"
 )
 
 type Postgres struct {
@@ -24,6 +25,17 @@ func New(dsn string, opts ...Option) (*Postgres, error) {
 	}
 
 	db, err := sqlx.Connect("postgres", dsn)
+	if err != nil {
+		return nil, err
+	}
+	const retryTimes = 10
+	for i := 0; i < retryTimes; i++ {
+		err = db.Ping()
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
 	if err != nil {
 		return nil, err
 	}
