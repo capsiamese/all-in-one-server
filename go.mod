@@ -6,6 +6,7 @@ require (
 	entgo.io/ent v0.10.2-0.20220502113020-4ac82f5bb3f0
 	fyne.io/fyne/v2 v2.2.3
 	github.com/Masterminds/squirrel v1.5.3
+	github.com/arl/statsviz v0.4.1
 	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gin-gonic/gin v1.8.1

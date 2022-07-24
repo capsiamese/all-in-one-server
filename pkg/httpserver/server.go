@@ -17,7 +17,6 @@ func New(h http.Handler, opts ...Option) *Server {
 	hs := &http.Server{
 		Handler: h,
 	}
-
 	s := &Server{
 		server:          hs,
 		notify:          make(chan error),
